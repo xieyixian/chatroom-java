@@ -44,6 +44,11 @@ public class MultiHttpSecurityConfig {
   PasswordEncoder passwordEncoder(){
     return new BCryptPasswordEncoder();
   }
+  private static void configureSwagger(HttpSecurity http) throws Exception {
+    // Swagger开放访问配置
+    http.authorizeRequests()
+            .antMatchers("/swagger-ui/**", "/v2/api-docs", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**", "/csrf", "/").permitAll();
+  }
   @Configuration
   @Order(1)
   public static class AdminSecurityConfig extends WebSecurityConfigurerAdapter{
@@ -74,6 +79,7 @@ public class MultiHttpSecurityConfig {
     protected void configure(HttpSecurity http) throws Exception {
       //将验证码过滤器添加在用户名密码过滤器的前面
       http.addFilterBefore(verificationCodeFilter, UsernamePasswordAuthenticationFilter.class);
+      configureSwagger(http);
       http.antMatcher("/admin/**").authorizeRequests()
               .anyRequest().authenticated()
               .and()
@@ -117,6 +123,12 @@ public class MultiHttpSecurityConfig {
       });
     }
 }
+
+
+
+
+
+
   @Configuration
   @Order(2)
   public static class UserSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -150,6 +162,7 @@ public class MultiHttpSecurityConfig {
     //登录验证
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+      configureSwagger(http);
       //将验证码过滤器添加在用户名密码过滤器的前面
       http.addFilterBefore(verificationCodeFilter, UsernamePasswordAuthenticationFilter.class);
       http.authorizeRequests()
