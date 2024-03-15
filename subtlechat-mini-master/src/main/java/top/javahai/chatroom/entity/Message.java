@@ -15,7 +15,15 @@ public class Message {
   private String fromNickname;
   private String fromUserProfile;
   private Integer messageTypeId;
+  private Long conversationId;
 
+  public Long getConversationId() {
+    return conversationId;
+  }
+
+  public void setFConversationId(Long conversationId) {
+    this.conversationId = conversationId;
+  }
   public String getFrom() {
     return from;
   }
