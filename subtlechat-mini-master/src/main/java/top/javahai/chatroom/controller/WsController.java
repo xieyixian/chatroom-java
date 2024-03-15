@@ -9,11 +9,14 @@ import org.springframework.stereotype.Controller;
 import top.javahai.chatroom.entity.GroupMsgContent;
 import top.javahai.chatroom.entity.Message;
 import top.javahai.chatroom.entity.User;
+import top.javahai.chatroom.entity.UserMessage;
 import top.javahai.chatroom.service.GroupMsgContentService;
+import top.javahai.chatroom.service.UserChatService;
 import top.javahai.chatroom.utils.TuLingUtil;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -25,19 +28,48 @@ public class WsController {
   @Autowired
   SimpMessagingTemplate simpMessagingTemplate;
 
+  @Autowired
+  private UserChatService userChatService;
   /**
    * 单聊的消息的接受与转发
    * @param authentication
    * @param message
    */
+//  @MessageMapping("/ws/chat")
+//  public void handleMessage(Authentication authentication, Message message){
+//    User user= ((User) authentication.getPrincipal());
+//    message.setFromNickname(user.getNickname());
+//    message.setFrom(user.getUsername());
+//    message.setCreateTime(new Date());
+//    simpMessagingTemplate.convertAndSendToUser(message.getTo(),"/queue/chat",message);
+//
+//  }
+
   @MessageMapping("/ws/chat")
-  public void handleMessage(Authentication authentication, Message message){
-    User user= ((User) authentication.getPrincipal());
+  public void handlePrivateMessage(Authentication authentication, Message message) {
+    User user = (User) authentication.getPrincipal();
     message.setFromNickname(user.getNickname());
     message.setFrom(user.getUsername());
     message.setCreateTime(new Date());
+
     simpMessagingTemplate.convertAndSendToUser(message.getTo(),"/queue/chat",message);
+
+
+//    // 设置消息的发送者用户
+//    userMessage.setSenderUser(sender);
+//    // 设置消息的发送时间
+//    userMessage.setSendTime(LocalDateTime.now());
+//    // 存储消息到数据库
+    UserMessage savedMessage = userChatService.sendMessage(
+            user.getUsername(),
+            message.getConversationId(),
+            message.getContent(),
+            message.getMessageTypeId()
+    );
+//
+//    simpMessagingTemplate.convertAndSendToUser(message.getTo(),"/queue/chat",message);
   }
+
 
   @Autowired
   GroupMsgContentService groupMsgContentService;
