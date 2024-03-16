@@ -33,6 +33,8 @@ public class Admin implements Serializable, UserDetails {
     */
     private String userProfile;
 
+    private String email;
+
 
     public Integer getId() {
         return id;
@@ -97,6 +99,14 @@ public class Admin implements Serializable, UserDetails {
 
     public void setUserProfile(String userProfile) {
         this.userProfile = userProfile;
+    }
+
+    public String getEmail(){
+        return email;
+    }
+
+    public void setEmail(String email){
+        this.email = email;
     }
 
 }

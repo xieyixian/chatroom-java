@@ -1,5 +1,6 @@
 package top.javahai.chatroom.config;
 
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import top.javahai.chatroom.entity.RespBean;
@@ -7,7 +8,9 @@ import top.javahai.chatroom.entity.RespBean;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 /**
@@ -26,16 +29,30 @@ public class VerificationCodeFilter extends GenericFilter {
     if ("POST".equals(request.getMethod())&&"/doLogin".equals(request.getServletPath())){
       //用户输入的验证码
       String code = request.getParameter("code");
+      String mailCode = request.getParameter("mailCode");
       //session中保存的验证码
       String verify_code = (String) request.getSession().getAttribute("verify_code");
+      String verify_code_mail= (String) request.getSession().getAttribute("mail_verify_code_login");
+
+//
+//      System.out.println("code: " + code);
+//      System.out.println("mailCode: " + mailCode);
+//      System.out.println("verify_code: " + verify_code);
+//      System.out.println("verify_code_mail: " + verify_code_mail);
+
       response.setContentType("application/json;charset=utf-8");
       PrintWriter writer = response.getWriter();
       //验证session中保存是否存在
       try {
         //验证是否相同
         if (!code.toLowerCase().equals(verify_code.toLowerCase())){
+          if(!verify_code_mail.equals(mailCode)){
+            writer.write(new ObjectMapper().writeValueAsString( RespBean.error("邮箱验证码错误！")));
+          }
+          else{
           //输出json
-          writer.write(new ObjectMapper().writeValueAsString( RespBean.error("验证码错误！")));
+          writer.write(new ObjectMapper().writeValueAsString( RespBean.error("图形验证码错误！")));
+          }
           return;
         }else {
           filterChain.doFilter(request,response);
@@ -48,29 +65,31 @@ public class VerificationCodeFilter extends GenericFilter {
       }
     }
     //管理端登录请求
-//    else if ("POST".equals(request.getMethod())&&"/admin/doLogin".equals(request.getServletPath())){
-//      //获取输入的验证码
-//      String mailCode = request.getParameter("mailCode");
-//      //获取session中保存的验证码
-//      String verifyCode = ((String) request.getSession().getAttribute("mail_verify_code"));
-//      //构建响应输出流
-//      response.setContentType("application/json;charset=utf-8");
-//      PrintWriter printWriter =response.getWriter();
-//      try {
-//        if(!mailCode.equals(verifyCode)){
-//          printWriter.write(new ObjectMapper().writeValueAsString(RespBean.error("验证码错误！")));
-//        }else {
-//          filterChain.doFilter(request,response);
-//        }
-//      }catch (NullPointerException e){
-//         printWriter.write(new ObjectMapper().writeValueAsString(RespBean.error("请求异常，请重新请求！")));
-//      }finally {
-//       printWriter.flush();
-//       printWriter.close();
-//      }
-//    }
+    else if ("POST".equals(request.getMethod())&&"/admin/doLogin".equals(request.getServletPath())){
+      //获取输入的验证码
+      String mailCode = request.getParameter("mailCode");
+      //获取session中保存的验证码
+      String verifyCode = ((String) request.getSession().getAttribute("mail_verify_code"));
+      //构建响应输出流
+      response.setContentType("application/json;charset=utf-8");
+      PrintWriter printWriter =response.getWriter();
+      try {
+        if(!mailCode.equals(verifyCode)){
+          printWriter.write(new ObjectMapper().writeValueAsString(RespBean.error("验证码错误！")));
+        }else {
+          filterChain.doFilter(request,response);
+        }
+      }catch (NullPointerException e){
+         printWriter.write(new ObjectMapper().writeValueAsString(RespBean.error("请求异常，请重新请求！")));
+      }finally {
+       printWriter.flush();
+       printWriter.close();
+      }
+    }
     else {
       filterChain.doFilter(request,response);
     }
   }
+
+
 }

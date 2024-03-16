@@ -36,6 +36,8 @@ public interface UserDao {
      */
     User queryById(Integer id);
 
+    User queryByUserName(String username);
+
     /**
      * 查询指定行数据
      *

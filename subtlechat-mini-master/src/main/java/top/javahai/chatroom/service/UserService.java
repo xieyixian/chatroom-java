@@ -41,6 +41,7 @@ public interface UserService {
      */
     User queryById(Integer id);
 
+    User queryByUserName(String username);
     /**
      * 查询多条数据
      *

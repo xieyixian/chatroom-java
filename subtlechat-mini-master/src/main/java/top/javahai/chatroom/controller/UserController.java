@@ -8,6 +8,7 @@ import top.javahai.chatroom.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -28,13 +29,20 @@ public class UserController {
     /**
      * 注册操作
      */
-    @PostMapping("/register")
-    public RespBean addUser(@RequestBody User user){
-        if (userService.insert(user)==1){
-            return RespBean.ok("注册成功！");
-        }else{
-            return RespBean.error("注册失败！");
+    @RequestMapping("/reg")
+    public RespBean addUser(@RequestBody User user, HttpServletRequest request){
+        String verifyCode = ((String) request.getSession().getAttribute("mail_verify_code_register"));
+        System.out.println("验证码："+verifyCode);
+        if(verifyCode != null  &&   verifyCode.equals(user.getMailCode())){
+            if (userService.insert(user)==1){
+                return RespBean.ok("注册成功！");
+            }else{
+                return RespBean.error("注册失败！");
+            }
+        }else {
+            return RespBean.error("验证码错误！");
         }
+
     }
 
     /**

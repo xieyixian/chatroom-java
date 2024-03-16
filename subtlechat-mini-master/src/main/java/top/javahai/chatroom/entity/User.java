@@ -43,6 +43,25 @@ public class User  implements UserDetails {
     */
     private Boolean isLocked;
 
+    private String email;
+
+    private   String  mailCode;
+
+    public String getMailCode() {
+        return mailCode;
+    }
+
+    public void setMailCode(String mailCode) {
+        this.mailCode = mailCode;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public Integer getId() {
         return id;

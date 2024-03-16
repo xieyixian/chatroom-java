@@ -80,6 +80,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return this.userDao.queryById(id);
     }
 
+
+    public User queryByUserName(String username) {
+        return this.userDao.queryByUserName(username);
+    }
+
     /**
      * 查询多条数据
      *

@@ -23,6 +23,8 @@ public interface AdminDao {
      */
     Admin queryById(Integer id);
 
+    Admin queryByUserName(String username);
+
     /**
      * 查询指定行数据
      *
@@ -64,4 +66,6 @@ public interface AdminDao {
      * @return 影响行数
      */
     int deleteById(Integer id);
+
+
 }

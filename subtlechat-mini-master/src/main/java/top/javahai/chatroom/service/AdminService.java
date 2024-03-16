@@ -19,6 +19,8 @@ public interface AdminService {
      */
     Admin queryById(Integer id);
 
+
+    Admin queryByUserName(String username);
     /**
      * 查询多条数据
      *
