@@ -167,4 +167,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     return userDao.deleteByIds(ids);
   }
 
+    @Override
+    public User queryByUsername(String userName) {
+        return userDao.queryByUsername(userName);
+    }
+
 }

@@ -93,4 +93,11 @@ public interface UserService {
     Integer changeLockedStatus(Integer id, Boolean isLocked);
 
     Integer deleteByIds(Integer[] ids);
+
+    /**
+     * 根据用户名获取用户信息
+     * @param userName
+     * @return
+     */
+    User queryByUsername(String userName);
 }
