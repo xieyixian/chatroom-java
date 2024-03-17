@@ -5,18 +5,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RequestParam;
 import top.javahai.chatroom.dao.UserDao;
-import top.javahai.chatroom.entity.RespBean;
 import top.javahai.chatroom.entity.RespPageBean;
 import top.javahai.chatroom.entity.User;
+import top.javahai.chatroom.repository.UserRepository;
 import top.javahai.chatroom.service.UserService;
 import org.springframework.stereotype.Service;
 import top.javahai.chatroom.utils.UserUtil;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * (User)表服务实现类
@@ -26,6 +26,13 @@ import java.util.List;
  */
 @Service("userService")
 public class UserServiceImpl implements UserService, UserDetailsService {
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Resource
     private UserDao userDao;
 
@@ -166,5 +173,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   public Integer deleteByIds(Integer[] ids) {
     return userDao.deleteByIds(ids);
   }
+    @Override
+    public Optional<User> findByUsername(String username) {
+        // 调用 repository 方法查找用户
+        return userRepository.findByUsername(username);
+    }
+
+    public List<User> findByUsernames(List<String> usernames) {
+        List<User> users = new ArrayList<>();
+        for (String username : usernames) {
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            userOptional.ifPresent(users::add); // 如果存在用户信息，则添加到列表中
+        }
+        return users;
+    }
 
 }
