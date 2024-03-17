@@ -1,6 +1,8 @@
 package top.javahai.chatroom.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,11 +29,15 @@ import top.javahai.chatroom.entity.User;
 import top.javahai.chatroom.service.impl.AdminServiceImpl;
 import top.javahai.chatroom.service.impl.UserServiceImpl;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.TimeUnit;
+
+import static top.javahai.chatroom.constant.RedisKeyConstant.USER_CONTINUE_LIFE_KEY;
 
 /**
  * @author Hai
@@ -141,6 +147,9 @@ public class MultiHttpSecurityConfig {
     @Autowired
     MyAuthenticationFailureHandler myAuthenticationFailureHandler;
 
+    @Resource
+    private RedissonClient redisson;
+
     //验证服务
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -184,6 +193,11 @@ public class MultiHttpSecurityConfig {
                   //更新用户状态为在线
                   userService.setUserStateToOn(user.getId());
                   user.setUserStateId(1);
+
+                  //redis缓存用户在线状态
+                  RBucket<Object> bucket = redisson.getBucket(String.format(USER_CONTINUE_LIFE_KEY,user.getId()));
+                  bucket.set("user_"+user.getId(),8L, TimeUnit.SECONDS);
+
                   //广播系统通知消息
                   simpMessagingTemplate.convertAndSend("/topic/notification","系统消息：用户【"+user.getNickname()+"】进入了聊天室");
                   RespBean ok = RespBean.ok("登录成功", user);
@@ -206,6 +220,11 @@ public class MultiHttpSecurityConfig {
                   //更新用户状态为离线
                   User user = (User) authentication.getPrincipal();
                   userService.setUserStateToLeave(user.getId());
+
+                  //redis缓存用户在线状态
+                  RBucket<Object> bucket = redisson.getBucket(String.format(USER_CONTINUE_LIFE_KEY,user.getId()));
+                  bucket.set("user_"+user.getId(),0L, TimeUnit.SECONDS);
+
                   //广播系统消息
                   simpMessagingTemplate.convertAndSend("/topic/notification","系统消息：用户【"+user.getNickname()+"】退出了聊天室");
                   resp.setContentType("application/json;charset=utf-8");
