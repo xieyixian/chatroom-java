@@ -10,6 +10,8 @@ public class RespBean {
   private String msg;//返回消息
   private Object obj;//返回实体
 
+  private String token;
+
   public static RespBean build(){
     return new RespBean();
   }
@@ -63,5 +65,13 @@ public class RespBean {
   public RespBean setObj(Object obj) {
     this.obj = obj;
     return this;
+  }
+  public void setToken(String token) {
+    this.token = token;
+  }
+
+  // Getter for the token
+  public String getToken() {
+    return this.token;
   }
 }
