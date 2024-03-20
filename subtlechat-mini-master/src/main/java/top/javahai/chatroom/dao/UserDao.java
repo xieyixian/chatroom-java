@@ -1,5 +1,6 @@
 package top.javahai.chatroom.dao;
 
+import org.apache.ibatis.annotations.Select;
 import org.yaml.snakeyaml.events.Event;
 import top.javahai.chatroom.entity.User;
 import org.apache.ibatis.annotations.Param;
@@ -93,4 +94,7 @@ public interface UserDao {
     Integer changeLockedStatus(@Param("id") Integer id, @Param("isLocked") Boolean isLocked);
 
   Integer deleteByIds(@Param("ids") Integer[] ids);
+
+    @Select("select * from user where username = #{username}")
+    User queryByUsername(@Param("username") String userName);
 }
