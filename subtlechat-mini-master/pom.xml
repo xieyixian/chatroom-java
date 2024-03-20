@@ -111,7 +111,11 @@
             <version>5.2.9.RELEASE</version>
             <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-crypto</artifactId>
+            <version>5.7.15</version>
+        </dependency>
 
     </dependencies>
 
