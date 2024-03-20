@@ -1,6 +1,8 @@
 package top.javahai.chatroom.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -189,10 +191,6 @@ public class MultiHttpSecurityConfig {
                 public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse resp, Authentication authentication) throws IOException, ServletException {
                   resp.setContentType("application/json;charset=utf-8");
                   PrintWriter out = resp.getWriter();
-                  String username = req.getParameter("username");
-                  String password = req.getParameter("password");
-                  System.out.println("Received username: " + username);
-                  System.out.println("Received password: " + password);
                   User user = (User) authentication.getPrincipal();
                   user.setPassword(null); // 出于安全考虑，不应返回密码
                   // 更新用户状态为在线
