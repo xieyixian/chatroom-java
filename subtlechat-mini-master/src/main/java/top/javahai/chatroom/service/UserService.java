@@ -1,10 +1,10 @@
 package top.javahai.chatroom.service;
 
-import top.javahai.chatroom.entity.RespBean;
 import top.javahai.chatroom.entity.RespPageBean;
 import top.javahai.chatroom.entity.User;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * (User)表服务接口
@@ -93,4 +93,8 @@ public interface UserService {
     Integer changeLockedStatus(Integer id, Boolean isLocked);
 
     Integer deleteByIds(Integer[] ids);
+
+    Optional<User> findByUsername(String currentUsername);
+
+    List<User> findByUsernames(List<String> memberUsernames);
 }
