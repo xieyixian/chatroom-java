@@ -188,4 +188,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return users;
     }
 
+    @Override
+    public User queryByUsername(String userName) {
+        return userDao.queryByUsername(userName);
+    }
+
 }
