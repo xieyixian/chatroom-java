@@ -12,6 +12,7 @@ import top.javahai.chatroom.entity.User;
 import top.javahai.chatroom.entity.UserMessage;
 import top.javahai.chatroom.service.GroupMsgContentService;
 import top.javahai.chatroom.service.UserChatService;
+import top.javahai.chatroom.utils.AesEncryptUtil;
 import top.javahai.chatroom.utils.TuLingUtil;
 
 import java.io.IOException;
@@ -46,11 +47,13 @@ public class WsController {
 //  }
 
   @MessageMapping("/ws/chat")
-  public void handlePrivateMessage(Authentication authentication, Message message) {
+  public void handlePrivateMessage(Authentication authentication, Message message) throws Exception {
+
     User user = (User) authentication.getPrincipal();
     message.setFromNickname(user.getNickname());
     message.setFrom(user.getUsername());
     message.setCreateTime(new Date());
+    message.setContent(AesEncryptUtil.desEncrypt(message.getContent()));
 
     simpMessagingTemplate.convertAndSendToUser(message.getTo(),"/queue/chat",message);
 
@@ -82,10 +85,10 @@ public class WsController {
    * @param groupMsgContent
    */
   @MessageMapping("/ws/groupChat")
-  public void handleGroupMessage(Authentication authentication, GroupMsgContent groupMsgContent){
+  public void handleGroupMessage(Authentication authentication, GroupMsgContent groupMsgContent) throws Exception {
     User currentUser= (User) authentication.getPrincipal();
     //处理emoji内容,转换成unicode编码
-    groupMsgContent.setContent(emojiConverter.toHtml(groupMsgContent.getContent()));
+    groupMsgContent.setContent(AesEncryptUtil.desEncrypt(groupMsgContent.getContent()));
     //保证来源正确性，从Security中获取用户信息
     groupMsgContent.setFromId(currentUser.getId());
     groupMsgContent.setFromName(currentUser.getNickname());
@@ -93,6 +96,7 @@ public class WsController {
     groupMsgContent.setCreateTime(new Date());
     //保存该条群聊消息记录到数据库中
     groupMsgContentService.insert(groupMsgContent);
+    groupMsgContent.setContent(AesEncryptUtil.encrypt(groupMsgContent.getContent()));
     //转发该条数据
     simpMessagingTemplate.convertAndSend("/topic/greetings",groupMsgContent);
   }
@@ -104,13 +108,14 @@ public class WsController {
    * @throws IOException
    */
   @MessageMapping("/ws/robotChat")
-  public void handleRobotChatMessage(Authentication authentication, Message message) throws IOException {
+  public void handleRobotChatMessage(Authentication authentication, Message message) throws Exception {
     User user = ((User) authentication.getPrincipal());
     //接收到的消息
     message.setFrom(user.getUsername());
     message.setCreateTime(new Date());
     message.setFromNickname(user.getNickname());
     message.setFromUserProfile(user.getUserProfile());
+
     //发送消息内容给机器人，获得回复
     String result = TuLingUtil.replyMessage(message.getContent());
     //构建返回消息JSON字符串
