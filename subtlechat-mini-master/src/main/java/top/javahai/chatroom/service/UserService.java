@@ -5,6 +5,7 @@ import top.javahai.chatroom.entity.RespPageBean;
 import top.javahai.chatroom.entity.User;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * (User)表服务接口
@@ -100,4 +101,8 @@ public interface UserService {
      * @return
      */
     User queryByUsername(String userName);
+
+    Optional<User> findByUsername(String currentUsername);
+
+    List<User> findByUsernames(List<String> memberUsernames);
 }
