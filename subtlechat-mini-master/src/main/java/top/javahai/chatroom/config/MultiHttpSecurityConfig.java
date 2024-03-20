@@ -26,12 +26,15 @@ import top.javahai.chatroom.entity.RespBean;
 import top.javahai.chatroom.entity.User;
 import top.javahai.chatroom.service.impl.AdminServiceImpl;
 import top.javahai.chatroom.service.impl.UserServiceImpl;
+import top.javahai.chatroom.utils.JwtUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Hai
@@ -116,13 +119,13 @@ public class MultiHttpSecurityConfig {
               .csrf().disable()//关闭csrf防御方便调试
               //没有认证时，在这里处理结果，不进行重定向到login页
               .exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPoint() {
-        @Override
-        public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
-          httpServletResponse.setStatus(401);
-        }
-      });
+                @Override
+                public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
+                  httpServletResponse.setStatus(401);
+                }
+              });
     }
-}
+  }
 
 
 
@@ -178,19 +181,33 @@ public class MultiHttpSecurityConfig {
                 @Override
                 public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse resp, Authentication authentication) throws IOException, ServletException {
                   resp.setContentType("application/json;charset=utf-8");
-                  PrintWriter out=resp.getWriter();
-                  User user=(User) authentication.getPrincipal();
-                  user.setPassword(null);
-                  //更新用户状态为在线
+                  PrintWriter out = resp.getWriter();
+                  String username = req.getParameter("username");
+                  String password = req.getParameter("password");
+                  System.out.println("Received username: " + username);
+                  System.out.println("Received password: " + password);
+                  User user = (User) authentication.getPrincipal();
+                  user.setPassword(null); // 出于安全考虑，不应返回密码
+                  // 更新用户状态为在线
                   userService.setUserStateToOn(user.getId());
                   user.setUserStateId(1);
-                  //广播系统通知消息
+                  // 广播系统通知消息
                   simpMessagingTemplate.convertAndSend("/topic/notification","系统消息：用户【"+user.getNickname()+"】进入了聊天室");
-                  RespBean ok = RespBean.ok("登录成功", user);
-                  String s = new ObjectMapper().writeValueAsString(ok);
-                  out.write(s);
+                  // 生成JWT
+                  final String jwt = JwtUtils.generateToken(user.getUsername());
+
+                  // 创建包含JWT和用户信息的响应
+                  Map<String, Object> tokenResponse = new HashMap<>();
+                  tokenResponse.put("token", jwt);
+                  tokenResponse.put("user", user); // 依你的实际需求，这里可以自定义需要返回的用户信息
+                  // 将响应序列化为JSON字符串
+                  String responseJson = new ObjectMapper().writeValueAsString(RespBean.ok("登录成功", tokenResponse));
+
+                  // 写入响应
+                  out.write(responseJson);
                   out.flush();
                   out.close();
+
                 }
               })
               //失败处理
@@ -220,11 +237,11 @@ public class MultiHttpSecurityConfig {
               .csrf().disable()//关闭csrf防御方便调试
               //没有认证时，在这里处理结果，不进行重定向到login页
               .exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPoint() {
-        @Override
-        public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
-          httpServletResponse.setStatus(401);
-        }
-      });
+                @Override
+                public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
+                  httpServletResponse.setStatus(401);
+                }
+              });
     }
   }
 
