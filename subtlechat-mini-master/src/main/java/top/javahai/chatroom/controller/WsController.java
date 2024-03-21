@@ -53,8 +53,15 @@ public class WsController {
     message.setFromNickname(user.getNickname());
     message.setFrom(user.getUsername());
     message.setCreateTime(new Date());
-    //message.setContent(AesEncryptUtil.desEncrypt(message.getContent()));
+//    message.setContent(AesEncryptUtil.desEncrypt(message.getContent()));
     message.setContent(message.getContent());
+    userChatService.sendMessage(
+            user.getUsername(),
+            message.getConversationId(),
+            message.getContent(),
+            message.getMessageTypeId()
+    );
+
     simpMessagingTemplate.convertAndSendToUser(message.getTo(),"/queue/chat",message);
 
 
@@ -63,12 +70,7 @@ public class WsController {
 //    // 设置消息的发送时间
 //    userMessage.setSendTime(LocalDateTime.now());
 //    // 存储消息到数据库
-    UserMessage savedMessage = userChatService.sendMessage(
-            user.getUsername(),
-            message.getConversationId(),
-            message.getContent(),
-            message.getMessageTypeId()
-    );
+
 //
 //    simpMessagingTemplate.convertAndSendToUser(message.getTo(),"/queue/chat",message);
   }
@@ -88,7 +90,7 @@ public class WsController {
   public void handleGroupMessage(Authentication authentication, GroupMsgContent groupMsgContent) throws Exception {
     User currentUser= (User) authentication.getPrincipal();
     //处理emoji内容,转换成unicode编码
-    groupMsgContent.setContent(AesEncryptUtil.desEncrypt(groupMsgContent.getContent()));
+    //groupMsgContent.setContent(AesEncryptUtil.desEncrypt(groupMsgContent.getContent()));
     //保证来源正确性，从Security中获取用户信息
     groupMsgContent.setFromId(currentUser.getId());
     groupMsgContent.setFromName(currentUser.getNickname());
@@ -96,7 +98,7 @@ public class WsController {
     groupMsgContent.setCreateTime(new Date());
     //保存该条群聊消息记录到数据库中
     groupMsgContentService.insert(groupMsgContent);
-    //groupMsgContent.setContent(AesEncryptUtil.encrypt(groupMsgContent.getContent()));
+//    groupMsgContent.setContent(AesEncryptUtil.encrypt(groupMsgContent.getContent()));
     groupMsgContent.setContent(groupMsgContent.getContent());
     //转发该条数据
     simpMessagingTemplate.convertAndSend("/topic/greetings",groupMsgContent);
