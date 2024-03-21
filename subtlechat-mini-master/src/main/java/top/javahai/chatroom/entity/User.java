@@ -48,6 +48,9 @@ public class User  implements UserDetails {
     * 是否被锁定
     */
     private Boolean isLocked;
+    private String email;
+
+    private String mailCode;
 
 
     public Integer getId() {
@@ -138,6 +141,22 @@ public class User  implements UserDetails {
         isLocked = locked;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public String getMailCode() {
+        return mailCode;
+    }
+
+    public void setMailCode(String mailCode) {
+        this.mailCode = mailCode;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -151,4 +170,6 @@ public class User  implements UserDetails {
                 ", isLocked=" + isLocked +
                 '}';
     }
+
+
 }

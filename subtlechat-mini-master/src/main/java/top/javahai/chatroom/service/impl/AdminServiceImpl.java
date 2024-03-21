@@ -47,6 +47,18 @@ public class AdminServiceImpl implements AdminService, UserDetailsService {
         return this.adminDao.queryById(id);
     }
 
+
+    /**
+     * 通过username查询单条数据
+     *
+     * @param username
+     * @return 实例对象
+     */
+
+    @Override
+    public Admin  queryByUserName(String username) {
+        return this.adminDao.queryByUserName(username);
+    }
     /**
      * 查询多条数据
      *
