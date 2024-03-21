@@ -1,5 +1,8 @@
 package top.javahai.chatroom.service.impl;
 
+import cn.hutool.core.date.DateUtil;
+import org.redisson.api.RList;
+import org.redisson.api.RedissonClient;
 import top.javahai.chatroom.entity.GroupMsgContent;
 import top.javahai.chatroom.dao.GroupMsgContentDao;
 import top.javahai.chatroom.entity.RespPageBean;
@@ -9,6 +12,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static top.javahai.chatroom.constant.RedisKeyConstant.GROUP_MSG_LIST_KEY;
 
 /**
  * (GroupMsgContent)表服务实现类
@@ -20,6 +26,9 @@ import java.util.List;
 public class GroupMsgContentServiceImpl implements GroupMsgContentService {
     @Resource
     private GroupMsgContentDao groupMsgContentDao;
+
+    @Resource
+    private RedissonClient redisson;
 
     /**
      * 通过ID查询单条数据
@@ -41,7 +50,24 @@ public class GroupMsgContentServiceImpl implements GroupMsgContentService {
      */
     @Override
     public List<GroupMsgContent> queryAllByLimit(Integer offset, Integer limit) {
-        return this.groupMsgContentDao.queryAllByLimit(offset, limit);
+        if(offset == null && limit == null){
+            String key = getGroupMsgKey();
+            RList<GroupMsgContent> list = redisson.getList(key);
+            if(list != null && !list.isEmpty()){
+                return list.readAll();
+            }
+        }
+        List<GroupMsgContent> retList = this.groupMsgContentDao.queryAllByLimit(offset, limit);
+        if(retList != null && !retList.isEmpty() && offset == null && limit == null){
+            RList<GroupMsgContent> list = redisson.getList(getGroupMsgKey());
+            list.addAll(retList);
+            list.expire(1L,TimeUnit.DAYS);
+        }
+        return retList;
+    }
+
+    private String getGroupMsgKey(){
+        return String.format(GROUP_MSG_LIST_KEY, DateUtil.format(new Date(),"yyyyMMdd"));
     }
 
     /**
@@ -53,6 +79,11 @@ public class GroupMsgContentServiceImpl implements GroupMsgContentService {
     @Override
     public GroupMsgContent insert(GroupMsgContent groupMsgContent) {
         this.groupMsgContentDao.insert(groupMsgContent);
+        String key = getGroupMsgKey();
+        RList<GroupMsgContent> list = redisson.getList(key);
+        if(list.isExists()){
+            list.add(groupMsgContent);
+        }
         return groupMsgContent;
     }
 
