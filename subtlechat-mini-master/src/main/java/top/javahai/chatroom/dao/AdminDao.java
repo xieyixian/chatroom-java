@@ -64,4 +64,13 @@ public interface AdminDao {
      * @return 影响行数
      */
     int deleteById(Integer id);
+
+
+    /**
+     * 通过主键删除数据
+     *
+     * @param username  用户名
+     * @return 实例对象
+     */
+    Admin queryByUserName(String username);
 }
