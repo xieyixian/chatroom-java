@@ -221,24 +221,6 @@ public class MultiHttpSecurityConfig {
                   PrintWriter out=resp.getWriter();
                   User user=(User) authentication.getPrincipal();
                   user.setPassword(null);
-
-                  RSAUtil rsa = new RSAUtil();
-
-                  String encryptedusername = null;
-                  String encrypteduseremail = null;
-                  try {
-                    encryptedusername = rsa.encryptWithPrivate(user.getUsername());
-                    encrypteduseremail = rsa.encryptWithPrivate(user.getEmail());
-                  } catch (Exception e) {
-                    RespBean wrong = RespBean.ok("加密失败");
-                    String w = new ObjectMapper().writeValueAsString(wrong);
-                    out.write(w);
-                    out.flush();
-                    out.close();
-                  }
-
-                  user.setUsername(encryptedusername);
-                  user.setEmail(encrypteduseremail);
                   System.out.println("1111111111111"+user.getUsername());
 
 
@@ -258,7 +240,8 @@ public class MultiHttpSecurityConfig {
                   // 创建包含JWT和用户信息的响应
                   Map<String, Object> tokenResponse = new HashMap<>();
                   tokenResponse.put("token", jwt);
-                  tokenResponse.put("user", user); // 依你的实际需求，这里可以自定义需要返回的用户信息
+                  tokenResponse.put("user", user);
+                  // 依你的实际需求，这里可以自定义需要返回的用户信息
                   // 将响应序列化为JSON字符串
                   String responseJson = new ObjectMapper().writeValueAsString(RespBean.ok("登录成功", tokenResponse));
 
