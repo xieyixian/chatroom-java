@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User queryByUserName(String username) {
-        return this.userDao.queryByUserName(username);
+        return userDao.queryByUserName(username);
     }
 
 
@@ -192,6 +192,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             userOptional.ifPresent(users::add); // 如果存在用户信息，则添加到列表中
         }
         return users;
+    }
+
+    @Override
+    public User queryByUsername(String userName) {
+        return userDao.queryByUsername(userName);
     }
 
 }
