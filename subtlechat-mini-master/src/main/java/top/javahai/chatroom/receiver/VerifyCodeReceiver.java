@@ -1,6 +1,8 @@
 package top.javahai.chatroom.receiver;
 
 
+import com.alibaba.fastjson.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.impl.AMQImpl;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * 处理发送验证码的消息，保证消息不会重复消费
@@ -46,8 +49,8 @@ public class VerifyCodeReceiver {
     ))
     public void getMessage(Message message, Channel channel) throws IOException {
         //获取消息内容
-        LOGGER.info("验证码以消费");
-        String code = message.getPayload().toString();
+        LOGGER.info("验证码已消费");
+        String info = message.getPayload().toString();
         //获取消息头，消息标志tag
         MessageHeaders headers = message.getHeaders();
         Long tag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
@@ -62,14 +65,24 @@ public class VerifyCodeReceiver {
 //            return;
 //        }
         //否则进行消息消费
+
+        info = info.replace("{", "").replace("}", "").replace("\"", "");
+        String[] parts = info.split(":");
+        String email = parts[0];
+        String code = parts[1];
+
+        System.out.println("Email: " + email);
+        System.out.println("Code: " + code);
+
+
         try {
+
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setSubject("微言聊天室管理端-验证码验证");
-            //TODO 使用Thymeleaf，改邮件模板,添加内容：请不要泄露自己的邮箱验证码
             msg.setText("本次登录的验证码：" + code);
-            msg.setFrom("发送者的邮箱地址");
+            msg.setFrom("tow8se@163.com");
             msg.setSentDate(new Date());
-            msg.setTo("接受者的邮箱地址");
+            msg.setTo(email);
             javaMailSender.send(msg);
             //消息发送成功，将id放到redis中,不能这样put
             //redisTemplate.opsForHash().entries("mail_log").put(msgId,code);
@@ -78,8 +91,8 @@ public class VerifyCodeReceiver {
             channel.basicAck(tag, false);
         } catch (Exception e) {
             //不批量处理，将消息重新放回到队列中
-            channel.basicNack(tag, false, true);
-            LOGGER.info("【" + msgId + "】消息重新放回到了队列中");
+            channel.basicReject(tag, false);
+            LOGGER.info("【" + msgId + "】消息被丢弃");
             e.printStackTrace();
         }
     }

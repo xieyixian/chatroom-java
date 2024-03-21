@@ -25,20 +25,20 @@ import top.javahai.chatroom.service.MailSendLogService;
 @Configuration
 public class RabbitMQConfig {
 
-//    @Value("${mail.exchange:mail-exchange}")
-//    private String mailExchange;
-//
-//    @Value("${mail.queue.verifyCode:mail-queue-verifyCode}")
-//    private String mailQueueVerifyCode;
-//
-//    @Value("${mail.route.verifyCode:mail-route-verifyCode}")
-//    private String mailRouteVerifyCode;
-//
-//    @Value("${mail.queue.feedback:mail-queue-feedback}")
-//    private String mailQueueFeedback;
-//
-//    @Value("${mail.route.feedback:mail-route-feedback}")
-//    private String mailRouteFeedback;
+    @Value("${mail.exchange:mail-exchange}")
+    private String mailExchange;
+
+    @Value("${mail.queue.verifyCode:mail-queue-verifyCode}")
+    private String mailQueueVerifyCode;
+
+    @Value("${mail.route.verifyCode:mail-route-verifyCode}")
+    private String mailRouteVerifyCode;
+
+    @Value("${mail.queue.feedback:mail-queue-feedback}")
+    private String mailQueueFeedback;
+
+    @Value("${mail.route.feedback:mail-route-feedback}")
+    private String mailRouteFeedback;
 
     @Autowired
     CachingConnectionFactory cachingConnectionFactory;
@@ -48,37 +48,37 @@ public class RabbitMQConfig {
 
     public static final Logger LOGGER= LoggerFactory.getLogger(RabbitMQConfig.class);
 
-//    @Bean
-//    DirectExchange mailExchange(){
-//        return new DirectExchange(mailExchange,true,false);
-//    }
-//
-//    /**
-//     * 验证码消息队列
-//     * @return
-//     */
-//    @Bean
-//    Queue mailQueueVerifyCode(){
-//        return new Queue(mailQueueVerifyCode,true);
-//    }
-//
-//    @Bean
-//    Binding mailQueueVerifyCodeBinding(){
-//        return BindingBuilder.bind(mailQueueVerifyCode()).to(mailExchange()).with(mailRouteVerifyCode);
-//    }
-//
-//    /**
-//     * 反馈消息队列
-//     * @return
-//     */
-//    @Bean
-//    Queue mailQueueFeedback(){
-//        return new Queue(mailQueueFeedback,true);
-//    }
-//    @Bean
-//    Binding mailQueueFeedbackBinding(){
-//        return BindingBuilder.bind(mailQueueFeedback()).to(mailExchange()).with(mailRouteFeedback);
-//    }
+    @Bean
+    DirectExchange mailExchange(){
+        return new DirectExchange(mailExchange,true,false);
+    }
+
+    /**
+     * 验证码消息队列
+     * @return
+     */
+    @Bean
+    Queue mailQueueVerifyCode(){
+        return new Queue(mailQueueVerifyCode,true);
+    }
+
+    @Bean
+    Binding mailQueueVerifyCodeBinding(){
+        return BindingBuilder.bind(mailQueueVerifyCode()).to(mailExchange()).with(mailRouteVerifyCode);
+    }
+
+    /**
+     * 反馈消息队列
+     * @return
+     */
+    @Bean
+    Queue mailQueueFeedback(){
+        return new Queue(mailQueueFeedback,true);
+    }
+    @Bean
+    Binding mailQueueFeedbackBinding(){
+        return BindingBuilder.bind(mailQueueFeedback()).to(mailExchange()).with(mailRouteFeedback);
+    }
 
     @Bean
     public RabbitTemplate rabbitTemplate(){
