@@ -90,7 +90,7 @@ public class WsController {
   public void handleGroupMessage(Authentication authentication, GroupMsgContent groupMsgContent) throws Exception {
     User currentUser= (User) authentication.getPrincipal();
     //处理emoji内容,转换成unicode编码
-    groupMsgContent.setContent(AesEncryptUtil.desEncrypt(groupMsgContent.getContent()));
+    //groupMsgContent.setContent(AesEncryptUtil.desEncrypt(groupMsgContent.getContent()));
     //保证来源正确性，从Security中获取用户信息
     groupMsgContent.setFromId(currentUser.getId());
     groupMsgContent.setFromName(currentUser.getNickname());
