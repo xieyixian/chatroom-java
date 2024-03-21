@@ -97,4 +97,7 @@ public interface UserService {
     Optional<User> findByUsername(String currentUsername);
 
     List<User> findByUsernames(List<String> memberUsernames);
+
+    User queryByUserName(String username);
+
 }

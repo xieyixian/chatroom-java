@@ -25,22 +25,46 @@ public class VerificationCodeFilter extends GenericFilter {
     //如果是登录请求则拦截
     if ("POST".equals(request.getMethod())&&"/doLogin".equals(request.getServletPath())){
       //用户输入的验证码
+
       String code = request.getParameter("code");
-      //session中保存的验证码
       String verify_code = (String) request.getSession().getAttribute("verify_code");
+      System.out.println("code:"+code);
+
       response.setContentType("application/json;charset=utf-8");
       PrintWriter writer = response.getWriter();
-      //验证session中保存是否存在
+
+      String type = request.getParameter("type");
+      System.out.println(type);
       try {
-        //验证是否相同
-        if (!code.toLowerCase().equals(verify_code.toLowerCase())){
-          //输出json
-          writer.write(new ObjectMapper().writeValueAsString( RespBean.error("验证码错误！")));
-          return;
+        if (type.equals("mailVerify")){
+          String mailCode = request.getParameter("mailCode");
+          String verify_code_mail= (String) request.getSession().getAttribute("mail_verify_code_login");
+
+          System.out.println("mailcode:"+mailCode);
+          System.out.println("mailcode_login:"+verify_code_mail);
+
+          try {
+//        //验证是否相同
+            if (!verify_code_mail.equals(mailCode)) {
+              //输出json
+              writer.write(new ObjectMapper().writeValueAsString( RespBean.error("邮箱验证码错误！")));
+            }else {
+              System.out.println("successful verified");
+              filterChain.doFilter(request,response);
+            }
+          }catch (NullPointerException e){
+            writer.write(new ObjectMapper().writeValueAsString(RespBean.error("请求异常，请重新请求！")));
+          }
         }else {
-          filterChain.doFilter(request,response);
+          if (!code.toLowerCase().equals(verify_code.toLowerCase())) {
+            //输出json
+            writer.write(new ObjectMapper().writeValueAsString(RespBean.error("验证码错误！")));
+          } else {
+            filterChain.doFilter(request, response);
+          }
         }
       }catch (NullPointerException e){
+        System.out.println("wrong");
         writer.write(new ObjectMapper().writeValueAsString(RespBean.error("请求异常，请重新请求！")));
       }finally {
         writer.flush();
@@ -48,27 +72,28 @@ public class VerificationCodeFilter extends GenericFilter {
       }
     }
     //管理端登录请求
-//    else if ("POST".equals(request.getMethod())&&"/admin/doLogin".equals(request.getServletPath())){
-//      //获取输入的验证码
-//      String mailCode = request.getParameter("mailCode");
-//      //获取session中保存的验证码
-//      String verifyCode = ((String) request.getSession().getAttribute("mail_verify_code"));
-//      //构建响应输出流
-//      response.setContentType("application/json;charset=utf-8");
-//      PrintWriter printWriter =response.getWriter();
-//      try {
-//        if(!mailCode.equals(verifyCode)){
-//          printWriter.write(new ObjectMapper().writeValueAsString(RespBean.error("验证码错误！")));
-//        }else {
-//          filterChain.doFilter(request,response);
-//        }
-//      }catch (NullPointerException e){
-//         printWriter.write(new ObjectMapper().writeValueAsString(RespBean.error("请求异常，请重新请求！")));
-//      }finally {
-//       printWriter.flush();
-//       printWriter.close();
-//      }
-//    }
+    else if ("POST".equals(request.getMethod())&&"/admin/doLogin".equals(request.getServletPath())){
+      //获取输入的验证码
+      String mailCode = request.getParameter("mailCode");
+      //获取session中保存的验证码
+      String verifyCode = ((String) request.getSession().getAttribute("mail_verify_code"));
+      //构建响应输出流
+      response.setContentType("application/json;charset=utf-8");
+      PrintWriter printWriter =response.getWriter();
+      try {
+        if(!mailCode.equals(verifyCode)){
+          printWriter.write(new ObjectMapper().writeValueAsString(RespBean.error("验证码错误！")));
+        }else {
+          filterChain.doFilter(request,response);
+        }
+      }catch (NullPointerException e){
+         printWriter.write(new ObjectMapper().writeValueAsString(RespBean.error("请求异常，请重新请求！")));
+      }finally {
+       printWriter.flush();
+       printWriter.close();
+      }
+    }
+
     else {
       filterChain.doFilter(request,response);
     }

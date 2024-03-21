@@ -36,6 +36,15 @@ public interface UserDao {
      */
     User queryById(Integer id);
 
+
+    /**
+     * 通过Username查询单条数据
+     *
+     * @param username 用户名
+     * @return 实例对象
+     */
+    User queryByUserName(String username);
+
     /**
      * 查询指定行数据
      *

@@ -1,5 +1,7 @@
 package top.javahai.chatroom.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import top.javahai.chatroom.service.VerifyCodeService;
 
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -45,13 +48,26 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
     }
 
     @Override
-    public void sendVerifyCodeMail(String code) {
+    public void sendVerifyCodeMail(Map<String, String> emailCodeMap) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // 将 Map<String, String> 对象转换为 JSON 字符串
+        String jsonEmailCodeMap;
+        try {
+            jsonEmailCodeMap = objectMapper.writeValueAsString(emailCodeMap);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            // 处理 JSON 转换异常
+            return;
+        }
+
         //添加消息记录
         LOGGER.info("发送验证码");
         String msgId = UUID.randomUUID().toString();
         MailSendLog mailSendLog = new MailSendLog();
         mailSendLog.setMsgId(msgId);
-        mailSendLog.setContent(code);
+        mailSendLog.setContent(jsonEmailCodeMap);
         mailSendLog.setContentType(MailConstants.VERIFY_CODE_TYPE);
         mailSendLog.setCount(1);
         mailSendLog.setCreateTime(new Date());
@@ -61,8 +77,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         mailSendLog.setRouteKey(mailRouteVerifyCode);
         mailSendLog.setStatus(MailConstants.DELIVERING);
         mailSendLogService.insert(mailSendLog);
-
-        rabbitTemplate.convertAndSend(mailExchange,mailRouteVerifyCode,code,new CorrelationData(msgId));
+        rabbitTemplate.convertAndSend(mailExchange,mailRouteVerifyCode,jsonEmailCodeMap,new CorrelationData(msgId));
 
     }
 }

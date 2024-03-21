@@ -1,6 +1,7 @@
 package top.javahai.chatroom.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.bouncycastle.jcajce.provider.asymmetric.RSA;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,12 +27,15 @@ import top.javahai.chatroom.entity.RespBean;
 import top.javahai.chatroom.entity.User;
 import top.javahai.chatroom.service.impl.AdminServiceImpl;
 import top.javahai.chatroom.service.impl.UserServiceImpl;
+import top.javahai.chatroom.utils.RSAUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import static top.javahai.chatroom.utils.RSAUtil.encryptWithPrivate;
 
 /**
  * @author Hai
@@ -62,6 +66,8 @@ public class MultiHttpSecurityConfig {
     MyAuthenticationFailureHandler myAuthenticationFailureHandler;
     @Autowired
     MyLogoutSuccessHandler myLogoutSuccessHandler;
+    @Autowired
+    DecryptFilter decryptFilter;
 
     //用户名和密码验证服务
     @Override
@@ -72,12 +78,13 @@ public class MultiHttpSecurityConfig {
     //忽略"/login","/verifyCode"请求，该请求不需要进入Security的拦截器
     @Override
     public void configure(WebSecurity web) throws Exception {
-      web.ignoring().antMatchers("/css/**","/fonts/**","/img/**","/js/**","/favicon.ico","/index.html","/admin/login","/admin/mailVerifyCode");
+      web.ignoring().antMatchers("/css/**","/fonts/**","/img/**","/js/**","/favicon.ico","/index.html","/admin/login","/admin/mailVerifyCode","/getPublicKey","/user/register");
     }
     //http请求验证和处理规则，响应处理的配置
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       //将验证码过滤器添加在用户名密码过滤器的前面
+      http.addFilterBefore(decryptFilter,UsernamePasswordAuthenticationFilter.class);
       http.addFilterBefore(verificationCodeFilter, UsernamePasswordAuthenticationFilter.class);
       configureSwagger(http);
       http.antMatcher("/admin/**").authorizeRequests()
@@ -93,9 +100,27 @@ public class MultiHttpSecurityConfig {
                 @Override
                 public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse resp, Authentication authentication) throws IOException, ServletException {
                   resp.setContentType("application/json;charset=utf-8");
-                  PrintWriter out=resp.getWriter();
-                  Admin admin=(Admin) authentication.getPrincipal();
+                  PrintWriter out = resp.getWriter();
+                  Admin admin = (Admin) authentication.getPrincipal();
                   admin.setPassword(null);
+                  RSAUtil rsa = new RSAUtil();
+
+                  String encryptedusername = null;
+                  String encrypteduseremail = null;
+                  try {
+                    encryptedusername = rsa.encryptWithPrivate(admin.getUsername());
+                    encrypteduseremail = rsa.encryptWithPrivate(admin.getEmail());
+                  } catch (Exception e) {
+                    RespBean wrong = RespBean.ok("加密失败");
+                    String w = new ObjectMapper().writeValueAsString(wrong);
+                    out.write(w);
+                    out.flush();
+                    out.close();
+                  }
+
+                  admin.setUsername(encryptedusername);
+                  admin.setEmail(encrypteduseremail);
+
                   RespBean ok = RespBean.ok("登录成功", admin);
                   String s = new ObjectMapper().writeValueAsString(ok);
                   out.write(s);
@@ -140,6 +165,8 @@ public class MultiHttpSecurityConfig {
     SimpMessagingTemplate simpMessagingTemplate;
     @Autowired
     MyAuthenticationFailureHandler myAuthenticationFailureHandler;
+    @Autowired
+    DecryptFilter decryptFilter;
 
     //验证服务
     @Override
@@ -157,13 +184,14 @@ public class MultiHttpSecurityConfig {
     //忽略"/login","/verifyCode"请求，该请求不需要进入Security的拦截器
     @Override
     public void configure(WebSecurity web) throws Exception {
-      web.ignoring().antMatchers("/login","/verifyCode","/file","/ossFileUpload","/user/register","/user/checkUsername","/user/checkNickname");
+      web.ignoring().antMatchers("/login","/verifyCode","/file","/ossFileUpload","/user/register","/user/checkUsername","/user/checkNickname","/getPublicKey","/user/loginMailVerifyCode","/user/mailVerifyCode","/doLoginMail");
     }
     //登录验证
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       configureSwagger(http);
       //将验证码过滤器添加在用户名密码过滤器的前面
+      http.addFilterBefore(decryptFilter,UsernamePasswordAuthenticationFilter.class);
       http.addFilterBefore(verificationCodeFilter, UsernamePasswordAuthenticationFilter.class);
       http.authorizeRequests()
               .anyRequest().authenticated()
@@ -181,6 +209,27 @@ public class MultiHttpSecurityConfig {
                   PrintWriter out=resp.getWriter();
                   User user=(User) authentication.getPrincipal();
                   user.setPassword(null);
+
+                  RSAUtil rsa = new RSAUtil();
+
+                  String encryptedusername = null;
+                  String encrypteduseremail = null;
+                  try {
+                    encryptedusername = rsa.encryptWithPrivate(user.getUsername());
+                    encrypteduseremail = rsa.encryptWithPrivate(user.getEmail());
+                  } catch (Exception e) {
+                    RespBean wrong = RespBean.ok("加密失败");
+                    String w = new ObjectMapper().writeValueAsString(wrong);
+                    out.write(w);
+                    out.flush();
+                    out.close();
+                  }
+
+                  user.setUsername(encryptedusername);
+                  user.setEmail(encrypteduseremail);
+                  System.out.println("1111111111111"+user.getUsername());
+
+
                   //更新用户状态为在线
                   userService.setUserStateToOn(user.getId());
                   user.setUserStateId(1);
@@ -226,6 +275,10 @@ public class MultiHttpSecurityConfig {
         }
       });
     }
+
   }
+
+
+
 
 }
