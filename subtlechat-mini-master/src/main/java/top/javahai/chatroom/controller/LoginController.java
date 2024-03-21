@@ -72,7 +72,12 @@ public class LoginController {
     } else if (choice.equals("username_admin")) {
       //获取前端用户名字符串
       System.out.println(param);
-      param = (param).substring(9);
+
+      param = param.replace("{", "").replace("}", "").replace("\"", "");
+      String[] parts = param.split(":");
+      param = parts[1];
+
+      //param = (param).substring(9);
       System.out.println("Get Admin UserName:" + param);
       Admin adminSearch;
       adminSearch = this.adminService.queryByUserName(param);
