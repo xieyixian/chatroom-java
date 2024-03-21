@@ -45,29 +45,29 @@ public class GroupMsgContentServiceImpl implements GroupMsgContentService {
      * 查询多条数据
      *
      * @param offset 查询起始位置
-     * @param limit 查询条数
+     * @param limit  查询条数
      * @return 对象列表
      */
     @Override
     public List<GroupMsgContent> queryAllByLimit(Integer offset, Integer limit) {
-        if(offset == null && limit == null){
+        if (offset == null && limit == null) {
             String key = getGroupMsgKey();
             RList<GroupMsgContent> list = redisson.getList(key);
-            if(list != null && !list.isEmpty()){
+            if (list != null && !list.isEmpty()) {
                 return list.readAll();
             }
         }
         List<GroupMsgContent> retList = this.groupMsgContentDao.queryAllByLimit(offset, limit);
-        if(retList != null && !retList.isEmpty() && offset == null && limit == null){
+        if (retList != null && !retList.isEmpty() && offset == null && limit == null) {
             RList<GroupMsgContent> list = redisson.getList(getGroupMsgKey());
             list.addAll(retList);
-            list.expire(1L,TimeUnit.DAYS);
+            list.expire(1L, TimeUnit.DAYS);
         }
         return retList;
     }
 
-    private String getGroupMsgKey(){
-        return String.format(GROUP_MSG_LIST_KEY, DateUtil.format(new Date(),"yyyyMMdd"));
+    private String getGroupMsgKey() {
+        return String.format(GROUP_MSG_LIST_KEY, DateUtil.format(new Date(), "yyyyMMdd"));
     }
 
     /**
@@ -81,7 +81,7 @@ public class GroupMsgContentServiceImpl implements GroupMsgContentService {
         this.groupMsgContentDao.insert(groupMsgContent);
         String key = getGroupMsgKey();
         RList<GroupMsgContent> list = redisson.getList(key);
-        if(list.isExists()){
+        if (list.isExists()) {
             list.add(groupMsgContent);
         }
         return groupMsgContent;
@@ -112,11 +112,11 @@ public class GroupMsgContentServiceImpl implements GroupMsgContentService {
 
     @Override
     public RespPageBean getAllGroupMsgContentByPage(Integer page, Integer size, String nickname, Integer type, Date[] dateScope) {
-        if (page!=null&&size!=null){
-            page=(page-1)*size;
+        if (page != null && size != null) {
+            page = (page - 1) * size;
         }
         List<GroupMsgContent> allGroupMsgContentByPage = groupMsgContentDao.getAllGroupMsgContentByPage(page, size, nickname, type, dateScope);
-        Long total=groupMsgContentDao.getTotal(nickname, type, dateScope);
+        Long total = groupMsgContentDao.getTotal(nickname, type, dateScope);
         RespPageBean respPageBean = new RespPageBean();
         respPageBean.setData(allGroupMsgContentByPage);
         respPageBean.setTotal(total);
@@ -126,5 +126,10 @@ public class GroupMsgContentServiceImpl implements GroupMsgContentService {
     @Override
     public Integer deleteGroupMsgContentByIds(Integer[] ids) {
         return groupMsgContentDao.deleteGroupMsgContentByIds(ids);
+    }
+
+    @Override
+    public void deleteGroupMsgById(GroupMsgContent groupMsgContent) {
+        groupMsgContentDao.deleteGroupMsgById(groupMsgContent);
     }
 }

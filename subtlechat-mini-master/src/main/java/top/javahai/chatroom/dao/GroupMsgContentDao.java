@@ -76,4 +76,6 @@ public interface GroupMsgContentDao {
                   @Param("dateScope") Date[] dateScope);
 
     Integer deleteGroupMsgContentByIds(@Param("ids") Integer[] ids);
+
+    void deleteGroupMsgById(GroupMsgContent groupMsgContent);
 }
