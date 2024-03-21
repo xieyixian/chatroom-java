@@ -1,5 +1,6 @@
 package top.javahai.chatroom.service;
 
+import top.javahai.chatroom.entity.RespBean;
 import top.javahai.chatroom.entity.RespPageBean;
 import top.javahai.chatroom.entity.User;
 
@@ -93,6 +94,13 @@ public interface UserService {
     Integer changeLockedStatus(Integer id, Boolean isLocked);
 
     Integer deleteByIds(Integer[] ids);
+
+    /**
+     * 根据用户名获取用户信息
+     * @param userName
+     * @return
+     */
+    User queryByUsername(String userName);
 
     Optional<User> findByUsername(String currentUsername);
 

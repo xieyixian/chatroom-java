@@ -1,6 +1,8 @@
 package top.javahai.chatroom.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.bouncycastle.jcajce.provider.asymmetric.RSA;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,12 +30,19 @@ import top.javahai.chatroom.entity.User;
 import top.javahai.chatroom.service.impl.AdminServiceImpl;
 import top.javahai.chatroom.service.impl.UserServiceImpl;
 import top.javahai.chatroom.utils.RSAUtil;
+import top.javahai.chatroom.utils.JwtUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.TimeUnit;
+
+import static top.javahai.chatroom.constant.RedisKeyConstant.USER_CONTINUE_LIFE_KEY;
+import java.util.HashMap;
+import java.util.Map;
 
 import static top.javahai.chatroom.utils.RSAUtil.encryptWithPrivate;
 
@@ -141,11 +150,11 @@ public class MultiHttpSecurityConfig {
               .csrf().disable()//关闭csrf防御方便调试
               //没有认证时，在这里处理结果，不进行重定向到login页
               .exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPoint() {
-        @Override
-        public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
-          httpServletResponse.setStatus(401);
-        }
-      });
+                @Override
+                public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
+                  httpServletResponse.setStatus(401);
+                }
+              });
     }
 }
 
@@ -167,6 +176,9 @@ public class MultiHttpSecurityConfig {
     MyAuthenticationFailureHandler myAuthenticationFailureHandler;
     @Autowired
     DecryptFilter decryptFilter;
+
+    @Resource
+    private RedissonClient redisson;
 
     //验证服务
     @Override
@@ -233,11 +245,25 @@ public class MultiHttpSecurityConfig {
                   //更新用户状态为在线
                   userService.setUserStateToOn(user.getId());
                   user.setUserStateId(1);
+
+                  //redis缓存用户在线状态
+                  RBucket<Object> bucket = redisson.getBucket(String.format(USER_CONTINUE_LIFE_KEY,user.getId()));
+                  bucket.set("user_"+user.getId(),8L, TimeUnit.SECONDS);
+
                   //广播系统通知消息
                   simpMessagingTemplate.convertAndSend("/topic/notification","系统消息：用户【"+user.getNickname()+"】进入了聊天室");
-                  RespBean ok = RespBean.ok("登录成功", user);
-                  String s = new ObjectMapper().writeValueAsString(ok);
-                  out.write(s);
+                  // 生成JWT
+                  final String jwt = JwtUtils.generateToken(user.getUsername());
+
+                  // 创建包含JWT和用户信息的响应
+                  Map<String, Object> tokenResponse = new HashMap<>();
+                  tokenResponse.put("token", jwt);
+                  tokenResponse.put("user", user); // 依你的实际需求，这里可以自定义需要返回的用户信息
+                  // 将响应序列化为JSON字符串
+                  String responseJson = new ObjectMapper().writeValueAsString(RespBean.ok("登录成功", tokenResponse));
+
+                  // 写入响应
+                  out.write(responseJson);
                   out.flush();
                   out.close();
                 }
@@ -255,6 +281,11 @@ public class MultiHttpSecurityConfig {
                   //更新用户状态为离线
                   User user = (User) authentication.getPrincipal();
                   userService.setUserStateToLeave(user.getId());
+
+                  //redis缓存用户在线状态
+                  RBucket<Object> bucket = redisson.getBucket(String.format(USER_CONTINUE_LIFE_KEY,user.getId()));
+                  bucket.set("user_"+user.getId(),0L, TimeUnit.SECONDS);
+
                   //广播系统消息
                   simpMessagingTemplate.convertAndSend("/topic/notification","系统消息：用户【"+user.getNickname()+"】退出了聊天室");
                   resp.setContentType("application/json;charset=utf-8");
@@ -269,16 +300,12 @@ public class MultiHttpSecurityConfig {
               .csrf().disable()//关闭csrf防御方便调试
               //没有认证时，在这里处理结果，不进行重定向到login页
               .exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPoint() {
-        @Override
-        public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
-          httpServletResponse.setStatus(401);
-        }
-      });
+                @Override
+                public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
+                  httpServletResponse.setStatus(401);
+                }
+              });
     }
-
   }
-
-
-
 
 }
