@@ -11,10 +11,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * @author Hai
- * @date 2020/6/20 - 23:43
- */
+
 public class FastDFSUtil {
   private static StorageClient1 client1;
 
@@ -32,22 +29,22 @@ public class FastDFSUtil {
   }
 
   /**
-   * 上传文件
+   * uploadfile
    * @param file
    * @return
    * @throws IOException
    * @throws MyException
    */
   public static String upload(MultipartFile file) throws IOException, MyException {
-    //文件名
+    // filename
     String oldName=file.getOriginalFilename();
-    //返回上传到服务器的路径
-    //文件拓展名oldName.substring(oldName.lastIndexOf(".")+1)
+    // server path
+    // oldName.substring(oldName.lastIndexOf(".")+1)
     return client1.upload_file1(file.getBytes(),oldName.substring(oldName.lastIndexOf(".")+1),null);
   }
 
   /**
-   *获取访问文件的令牌
+   * Get a token to access a file
    * @throws UnsupportedEncodingException
    * @throws NoSuchAlgorithmException
    * @throws MyException

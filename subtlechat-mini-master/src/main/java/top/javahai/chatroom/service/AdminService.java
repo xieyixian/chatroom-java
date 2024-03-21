@@ -19,6 +19,15 @@ public interface AdminService {
      */
     Admin queryById(Integer id);
 
+
+    /**
+     * 通过ID查询单条数据
+     *
+     * @param username 用户名
+     * @return 实例对象
+     */
+    Admin queryByUserName(String username);
+
     /**
      * 查询多条数据
      *
