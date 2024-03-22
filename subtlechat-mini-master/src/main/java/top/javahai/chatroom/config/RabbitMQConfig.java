@@ -34,11 +34,25 @@ public class RabbitMQConfig {
     @Value("${mail.route.verifyCode:mail-route-verifyCode}")
     private String mailRouteVerifyCode;
 
+    @Value("${msg.route.verifyCode:msg-route-verifyCode}")
+    private String msgRouteVerifyCode;
+
+
     @Value("${mail.queue.feedback:mail-queue-feedback}")
     private String mailQueueFeedback;
 
     @Value("${mail.route.feedback:mail-route-feedback}")
     private String mailRouteFeedback;
+
+    @Value("${msg.exchange:msg-exchange}")
+    private String msgExchange;
+
+    @Value("${msg.queue:msg-queue}")
+    private String msgQueue;
+
+
+
+
 
     @Autowired
     CachingConnectionFactory cachingConnectionFactory;
@@ -52,6 +66,12 @@ public class RabbitMQConfig {
     DirectExchange mailExchange(){
         return new DirectExchange(mailExchange,true,false);
     }
+
+    @Bean
+    DirectExchange msgExchange(){
+        return new DirectExchange(msgExchange,true,false);
+    }
+
 
     /**
      * 验证码消息队列
@@ -75,10 +95,27 @@ public class RabbitMQConfig {
     Queue mailQueueFeedback(){
         return new Queue(mailQueueFeedback,true);
     }
+
     @Bean
     Binding mailQueueFeedbackBinding(){
         return BindingBuilder.bind(mailQueueFeedback()).to(mailExchange()).with(mailRouteFeedback);
     }
+
+    /**
+     * 新消息队列
+     * @return
+     */
+    @Bean
+    Queue msgQueue(){
+        return new Queue(msgQueue,true);
+    }
+
+    @Bean
+    Binding msgQueueBinding(){
+        return BindingBuilder.bind(msgQueue()).to(msgExchange()).with(msgRouteVerifyCode);
+    }
+
+
 
     @Bean
     public RabbitTemplate rabbitTemplate(){
