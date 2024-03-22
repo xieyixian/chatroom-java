@@ -11,6 +11,7 @@ import top.javahai.chatroom.entity.Message;
 import top.javahai.chatroom.entity.User;
 import top.javahai.chatroom.entity.UserMessage;
 import top.javahai.chatroom.service.GroupMsgContentService;
+import top.javahai.chatroom.service.MessageService;
 import top.javahai.chatroom.service.UserChatService;
 import top.javahai.chatroom.utils.AesEncryptUtil;
 import top.javahai.chatroom.utils.TuLingUtil;
@@ -46,6 +47,9 @@ public class WsController {
 //
 //  }
 
+
+  @Autowired
+  MessageService messageService;
   @MessageMapping("/ws/chat")
   public void handlePrivateMessage(Authentication authentication, Message message) throws Exception {
 
@@ -55,6 +59,8 @@ public class WsController {
     message.setCreateTime(new Date());
 //    message.setContent(AesEncryptUtil.desEncrypt(message.getContent()));
     message.setContent(message.getContent());
+
+
     userChatService.sendMessage(
             user.getUsername(),
             message.getConversationId(),
@@ -78,6 +84,8 @@ public class WsController {
 
   @Autowired
   GroupMsgContentService groupMsgContentService;
+
+
   EmojiConverter emojiConverter = EmojiConverter.getInstance();
 
   SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -96,12 +104,12 @@ public class WsController {
     groupMsgContent.setFromName(currentUser.getNickname());
     groupMsgContent.setFromProfile(currentUser.getUserProfile());
     groupMsgContent.setCreateTime(new Date());
+    groupMsgContent.setContent(groupMsgContent.getContent());
     //保存该条群聊消息记录到数据库中
     groupMsgContentService.insert(groupMsgContent);
-//    groupMsgContent.setContent(AesEncryptUtil.encrypt(groupMsgContent.getContent()));
-    groupMsgContent.setContent(groupMsgContent.getContent());
-    //转发该条数据
-    simpMessagingTemplate.convertAndSend("/topic/greetings",groupMsgContent);
+
+    messageService.SendGroupMsg(groupMsgContent);
+
   }
 
   /**
