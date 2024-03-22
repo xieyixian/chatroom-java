@@ -96,6 +96,7 @@ public class WsController {
     groupMsgContent.setFromName(currentUser.getNickname());
     groupMsgContent.setFromProfile(currentUser.getUserProfile());
     groupMsgContent.setCreateTime(new Date());
+    groupMsgContent.setType(groupMsgContent.getType());
     //保存该条群聊消息记录到数据库中
     groupMsgContentService.insert(groupMsgContent);
 //    groupMsgContent.setContent(AesEncryptUtil.encrypt(groupMsgContent.getContent()));
