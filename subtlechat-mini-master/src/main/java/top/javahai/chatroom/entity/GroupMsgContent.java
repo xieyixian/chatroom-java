@@ -14,35 +14,36 @@ import java.io.Serializable;
 public class GroupMsgContent implements Serializable {
     private static final long serialVersionUID = 980328865610261046L;
     /**
-    * 消息内容编号
-    */
+     * 消息内容编号
+     */
     private Integer id;
     /**
-    * 发送者的编号
-    */
+     * 发送者的编号
+     */
     private Integer fromId;
     /**
-    * 发送者的昵称
-    */
+     * 发送者的昵称
+     */
     private String fromName;
     /**
-    * 发送者的头像
-    */
+     * 发送者的头像
+     */
     private String fromProfile;
     /**
-    * 消息发送时间
-    */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+     * 消息发送时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     /**
-    * 消息内容
-    */
+     * 消息内容
+     */
     private String content;
     /**
-    * 消息类型编号
-    */
+     * 消息类型编号
+     */
     private Integer messageTypeId;
 
+    private int type;
 
     public Integer getId() {
         return id;
@@ -100,6 +101,14 @@ public class GroupMsgContent implements Serializable {
         this.messageTypeId = messageTypeId;
     }
 
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return "GroupMsgContent{" +
@@ -110,6 +119,7 @@ public class GroupMsgContent implements Serializable {
                 ", createTime=" + createTime +
                 ", content='" + content + '\'' +
                 ", messageTypeId=" + messageTypeId +
+                ", type=" + type +
                 '}';
     }
 }

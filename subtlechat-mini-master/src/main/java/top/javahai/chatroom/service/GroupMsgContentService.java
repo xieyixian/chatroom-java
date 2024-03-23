@@ -26,7 +26,7 @@ public interface GroupMsgContentService {
      * 查询多条数据
      *
      * @param offset 查询起始位置
-     * @param limit 查询条数
+     * @param limit  查询条数
      * @return 对象列表
      */
     List<GroupMsgContent> queryAllByLimit(Integer offset, Integer limit);
@@ -58,4 +58,6 @@ public interface GroupMsgContentService {
     RespPageBean getAllGroupMsgContentByPage(Integer page, Integer size, String nickname, Integer type, Date[] dateScope);
 
     Integer deleteGroupMsgContentByIds(Integer[] ids);
+
+    void deleteGroupMsgById(GroupMsgContent groupMsgContent);
 }
