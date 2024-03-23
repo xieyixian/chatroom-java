@@ -113,10 +113,7 @@ public class WsController {
     groupMsgContent.setType(groupMsgContent.getType());
     //保存该条群聊消息记录到数据库中
     groupMsgContentService.insert(groupMsgContent);
-//    groupMsgContent.setContent(AesEncryptUtil.encrypt(groupMsgContent.getContent()));
-    groupMsgContent.setContent(groupMsgContent.getContent());
-    //转发该条数据
-    simpMessagingTemplate.convertAndSend("/topic/greetings",groupMsgContent);
+    messageService.SendGroupMsg(groupMsgContent);
   }
 
   /**
