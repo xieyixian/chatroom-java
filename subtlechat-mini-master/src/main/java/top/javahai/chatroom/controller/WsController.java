@@ -13,6 +13,7 @@ import top.javahai.chatroom.entity.UserMessage;
 import top.javahai.chatroom.service.GroupMsgContentService;
 import top.javahai.chatroom.service.MessageService;
 import top.javahai.chatroom.service.UserChatService;
+import top.javahai.chatroom.service.impl.AesEncryptServiceImpl;
 import top.javahai.chatroom.utils.AesEncryptUtil;
 import top.javahai.chatroom.utils.TuLingUtil;
 
@@ -50,6 +51,9 @@ public class WsController {
 
   @Autowired
   MessageService messageService;
+  @Autowired
+  AesEncryptServiceImpl aesEncryptService;
+
   @MessageMapping("/ws/chat")
   public void handlePrivateMessage(Authentication authentication, Message message) throws Exception {
 
@@ -67,6 +71,11 @@ public class WsController {
             message.getContent(),
             message.getMessageTypeId()
     );
+    String key = aesEncryptService.getKey(message.getConversationId());
+    AesEncryptUtil aesEncryptUtil = new AesEncryptUtil(key);
+    message.setContent(aesEncryptUtil.encrypt(message.getContent(),aesEncryptUtil.getKEY(),aesEncryptUtil.getIV()));
+    System.out.println("11111"+message.getContent());
+
 
     simpMessagingTemplate.convertAndSendToUser(message.getTo(),"/queue/chat",message);
 
@@ -107,7 +116,7 @@ public class WsController {
     groupMsgContent.setContent(groupMsgContent.getContent());
     //保存该条群聊消息记录到数据库中
     groupMsgContentService.insert(groupMsgContent);
-
+    //simpMessagingTemplate.convertAndSend("/topic/greetings",groupMsgContent);
     messageService.SendGroupMsg(groupMsgContent);
 
   }
