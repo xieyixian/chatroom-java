@@ -6,6 +6,9 @@ package top.javahai.chatroom.utils;
  */
 
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.servlet.resource.ContentVersionStrategy;
+import top.javahai.chatroom.repository.ConversationRepository;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -14,22 +17,47 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class AesEncryptUtil {
 
+
+    private String KEY = "1234567890123456";
+    private String IV = "1234567890123456";
+
+    public AesEncryptUtil(String KEY) {
+        this.KEY = KEY;
+        this.IV = KEY;
+    }
+
     //使用AES-128-CBC加密模式，key需要为16位,key和iv可以相同！
-    private static String KEY = "1234567890123456";
 
-    private static String IV = "1234567890123456";
 
+    public String getKEY() {
+        return KEY;
+    }
+
+    public void setKEY(String KEY) {
+        this.KEY = KEY;
+    }
+
+    public String getIV() {
+        return IV;
+    }
+
+    public void setIV(String IV) {
+        this.IV = IV;
+    }
 
     /**
      * 加密方法
-     * @param data  要加密的数据
-     * @param key 加密key
-     * @param iv 加密iv
+     *
+     * @param data 要加密的数据
+     * @param key  加密key
+     * @param iv   加密iv
      * @return 加密的结果
      * @throws Exception
      */
-    public static String encrypt(String data, String key, String iv) throws Exception {
+    public String encrypt(String data, String key, String iv) throws Exception {
         try {
+
+            System.out.println("aes加密前的数据: "+data);
 
             Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");//"算法/模式/补码方式"NoPadding PkcsPadding
             int blockSize = cipher.getBlockSize();
@@ -49,6 +77,7 @@ public class AesEncryptUtil {
             cipher.init(Cipher.ENCRYPT_MODE, keyspec, ivspec);
             byte[] encrypted = cipher.doFinal(plaintext);
 
+            System.out.println("加密后的数据: "+new Base64().encodeToString(encrypted));
             return new Base64().encodeToString(encrypted);
 
         } catch (Exception e) {
@@ -59,13 +88,14 @@ public class AesEncryptUtil {
 
     /**
      * 解密方法
+     *
      * @param data 要解密的数据
      * @param key  解密key
-     * @param iv 解密iv
+     * @param iv   解密iv
      * @return 解密的结果
      * @throws Exception
      */
-    public static String desEncrypt(String data, String key, String iv) throws Exception {
+    public String desEncrypt(String data, String key, String iv) throws Exception {
         try {
             byte[] encrypted1 = new Base64().decode(data);
 
@@ -84,46 +114,48 @@ public class AesEncryptUtil {
         }
     }
 
+
     /**
      * 使用默认的key和iv加密
+     *
      * @param data
      * @return
      * @throws Exception
      */
-    public static String encrypt(String data) throws Exception {
+    public String encrypt(String data) throws Exception {
         return encrypt(data, KEY, IV);
     }
 
     /**
      * 使用默认的key和iv解密
+     *
      * @param data
      * @return
      * @throws Exception
      */
-    public static String desEncrypt(String data) throws Exception {
+    public String desEncrypt(String data) throws Exception {
         return desEncrypt(data, KEY, IV);
     }
 
 
-
-    /**
-     * 测试
-     */
-    public static void main(String args[]) throws Exception {
-
-        String test1 = "ze3s89v7jw21k/JwZFgx3g==";
-//        String test =new String(test1.getBytes(),"UTF-8");
-//        String data = null;
-//        String key =  KEY;
-//        String iv = IV;
-//        // /g2wzfqvMOeazgtsUVbq1kmJawROa6mcRAzwG1/GeJ4=
-//        data = encrypt(test, key, iv);
-//        System.out.println("数据："+test);
-//        System.out.println("加密："+data);
-        String jiemi =desEncrypt(test1, KEY, IV).trim();
-        System.out.println("解密："+jiemi);
-
-
-    }
-
+//    /**
+//     * 测试
+//     */
+//    public static void main(String args[]) throws Exception {
+//
+//        String test1 = "ze3s89v7jw21k/JwZFgx3g==";
+////        String test =new String(test1.getBytes(),"UTF-8");
+////        String data = null;
+////        String key =  KEY;
+////        String iv = IV;
+////        // /g2wzfqvMOeazgtsUVbq1kmJawROa6mcRAzwG1/GeJ4=
+////        data = encrypt(test, key, iv);
+////        System.out.println("数据："+test);
+////        System.out.println("加密："+data);
+//        String jiemi =desEncrypt(test1, KEY, IV).trim();
+//        System.out.println("解密："+jiemi);
+//
+//
+//    }
+//
 }
