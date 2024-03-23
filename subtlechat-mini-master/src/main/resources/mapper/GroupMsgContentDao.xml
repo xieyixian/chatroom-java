@@ -62,8 +62,9 @@
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="id" useGeneratedKeys="true">
-        insert into chatroom.group_msg_content(from_id, from_name, from_profile, create_time, content, message_type_id)
-        values (#{fromId}, #{fromName}, #{fromProfile}, #{createTime}, #{content}, #{messageTypeId})
+        insert into chatroom.group_msg_content(from_id, from_name, from_profile, create_time, content, message_type_id,
+                                               type)
+        values (#{fromId}, #{fromName}, #{fromProfile}, #{createTime}, #{content}, #{messageTypeId}, #{type})
     </insert>
 
     <!--通过主键修改数据-->
@@ -129,5 +130,10 @@
         <foreach collection="ids" item="id" open="(" close=")" separator=",">
             #{id}
         </foreach>
+    </delete>
+    <delete id="deleteGroupMsgById">
+        delete
+        from group_msg_content
+        where id = #{id}
     </delete>
 </mapper>
