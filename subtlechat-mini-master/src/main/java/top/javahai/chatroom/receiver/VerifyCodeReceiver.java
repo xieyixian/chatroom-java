@@ -16,6 +16,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.messaging.Message;
@@ -36,8 +37,8 @@ import java.util.Map;
 public class VerifyCodeReceiver {
     @Autowired
     JavaMailSender javaMailSender;
-//    @Autowired
-//    StringRedisTemplate redisTemplate;
+    @Autowired
+    StringRedisTemplate redisTemplate;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VerifyCodeReceiver.class);
 
@@ -58,12 +59,12 @@ public class VerifyCodeReceiver {
         String msgId = (String) headers.get("spring_returned_message_correlation");
         LOGGER.info("【" + msgId + "】-正在处理的消息");
         //查看消息是否已消费
-//        if (redisTemplate.opsForHash().entries("mail_log").containsKey(msgId)){
-//            //手动确认消息已消费
-//            channel.basicAck(tag,false);
-//            LOGGER.info("【"+msgId+"】消息出现重复消费");
-//            return;
-//        }
+        if (redisTemplate.opsForHash().entries("mail_log").containsKey(msgId)){
+            //手动确认消息已消费
+            channel.basicAck(tag,false);
+            LOGGER.info("【"+msgId+"】消息出现重复消费");
+            return;
+        }
         //否则进行消息消费
 
         info = info.replace("{", "").replace("}", "").replace("\"", "");
@@ -85,8 +86,8 @@ public class VerifyCodeReceiver {
             msg.setTo(email);
             javaMailSender.send(msg);
             //消息发送成功，将id放到redis中,不能这样put
-            //redisTemplate.opsForHash().entries("mail_log").put(msgId,code);
-//            redisTemplate.opsForHash().put("mail_log",msgId,code);
+            redisTemplate.opsForHash().entries("mail_log").put(msgId,code);
+            redisTemplate.opsForHash().put("mail_log",msgId,code);
             //确认消息消费成功
             channel.basicAck(tag, false);
         } catch (Exception e) {
