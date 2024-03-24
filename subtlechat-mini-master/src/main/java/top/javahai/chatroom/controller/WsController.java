@@ -57,22 +57,31 @@ public class WsController {
   @MessageMapping("/ws/chat")
   public void handlePrivateMessage(Authentication authentication, Message message) throws Exception {
 
+    //get aes key
+    String key = aesEncryptService.getKey(message.getConversationId());
+    AesEncryptUtil aesEncryptUtil = new AesEncryptUtil(key);
+
+
     User user = (User) authentication.getPrincipal();
     message.setFromNickname(user.getNickname());
     message.setFrom(user.getUsername());
     message.setCreateTime(new Date());
 //    message.setContent(AesEncryptUtil.desEncrypt(message.getContent()));
-    message.setContent(message.getContent());
+    String desContent = aesEncryptUtil.desEncrypt(message.getContent(),aesEncryptUtil.getKEY(),aesEncryptUtil.getIV());
+
+    message.setContent(desContent);
+    System.out.println("message been des "+message.getContent());
+
+    System.out.println(message.getContent());
     userChatService.sendMessage(
             user.getUsername(),
             message.getConversationId(),
             message.getContent(),
             message.getMessageTypeId()
     );
-    String key = aesEncryptService.getKey(message.getConversationId());
-    AesEncryptUtil aesEncryptUtil = new AesEncryptUtil(key);
+
     message.setContent(aesEncryptUtil.encrypt(message.getContent(),aesEncryptUtil.getKEY(),aesEncryptUtil.getIV()));
-    System.out.println("11111"+message.getContent());
+    System.out.println("message need to be sent "+message.getContent());
 
 
     simpMessagingTemplate.convertAndSendToUser(message.getTo(),"/queue/chat",message);

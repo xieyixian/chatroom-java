@@ -57,9 +57,9 @@ public class AesEncryptUtil {
     public String encrypt(String data, String key, String iv) throws Exception {
         try {
 
-            System.out.println("aes加密前的数据: "+data);
+            System.out.println("Data before aes encryption: "+data);
 
-            Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");//"算法/模式/补码方式"NoPadding PkcsPadding
+            Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
             int blockSize = cipher.getBlockSize();
 
             byte[] dataBytes = data.getBytes();
@@ -77,7 +77,7 @@ public class AesEncryptUtil {
             cipher.init(Cipher.ENCRYPT_MODE, keyspec, ivspec);
             byte[] encrypted = cipher.doFinal(plaintext);
 
-            System.out.println("加密后的数据: "+new Base64().encodeToString(encrypted));
+            System.out.println("Data after encryption: "+new Base64().encodeToString(encrypted));
             return new Base64().encodeToString(encrypted);
 
         } catch (Exception e) {
