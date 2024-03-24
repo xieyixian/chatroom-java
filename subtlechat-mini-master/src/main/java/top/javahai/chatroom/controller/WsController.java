@@ -11,7 +11,9 @@ import top.javahai.chatroom.entity.Message;
 import top.javahai.chatroom.entity.User;
 import top.javahai.chatroom.entity.UserMessage;
 import top.javahai.chatroom.service.GroupMsgContentService;
+import top.javahai.chatroom.service.MessageService;
 import top.javahai.chatroom.service.UserChatService;
+import top.javahai.chatroom.service.impl.AesEncryptServiceImpl;
 import top.javahai.chatroom.utils.AesEncryptUtil;
 import top.javahai.chatroom.utils.TuLingUtil;
 
@@ -46,21 +48,41 @@ public class WsController {
 //
 //  }
 
+
+  @Autowired
+  MessageService messageService;
+  @Autowired
+  AesEncryptServiceImpl aesEncryptService;
+
   @MessageMapping("/ws/chat")
   public void handlePrivateMessage(Authentication authentication, Message message) throws Exception {
+
+    //get aes key
+    String key = aesEncryptService.getKey(message.getConversationId());
+    AesEncryptUtil aesEncryptUtil = new AesEncryptUtil(key);
+
 
     User user = (User) authentication.getPrincipal();
     message.setFromNickname(user.getNickname());
     message.setFrom(user.getUsername());
     message.setCreateTime(new Date());
 //    message.setContent(AesEncryptUtil.desEncrypt(message.getContent()));
-    message.setContent(message.getContent());
+    String desContent = aesEncryptUtil.desEncrypt(message.getContent(),aesEncryptUtil.getKEY(),aesEncryptUtil.getIV());
+
+    message.setContent(desContent);
+    System.out.println("message been des "+message.getContent());
+
+    System.out.println(message.getContent());
     userChatService.sendMessage(
             user.getUsername(),
             message.getConversationId(),
             message.getContent(),
             message.getMessageTypeId()
     );
+
+    message.setContent(aesEncryptUtil.encrypt(message.getContent(),aesEncryptUtil.getKEY(),aesEncryptUtil.getIV()));
+    System.out.println("message need to be sent "+message.getContent());
+
 
     simpMessagingTemplate.convertAndSendToUser(message.getTo(),"/queue/chat",message);
 
@@ -96,13 +118,11 @@ public class WsController {
     groupMsgContent.setFromName(currentUser.getNickname());
     groupMsgContent.setFromProfile(currentUser.getUserProfile());
     groupMsgContent.setCreateTime(new Date());
+    groupMsgContent.setContent(groupMsgContent.getContent());
     groupMsgContent.setType(groupMsgContent.getType());
     //保存该条群聊消息记录到数据库中
     groupMsgContentService.insert(groupMsgContent);
-//    groupMsgContent.setContent(AesEncryptUtil.encrypt(groupMsgContent.getContent()));
-    groupMsgContent.setContent(groupMsgContent.getContent());
-    //转发该条数据
-    simpMessagingTemplate.convertAndSend("/topic/greetings",groupMsgContent);
+    messageService.SendGroupMsg(groupMsgContent);
   }
 
   /**

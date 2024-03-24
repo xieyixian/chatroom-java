@@ -15,4 +15,6 @@ public class MailConstants {
     public static final Integer FEEDBACK_TYPE=1;
     //消息类型为验证码
     public static final Integer VERIFY_CODE_TYPE=2;
+    //消息类型为消息
+    public static final Integer VERIFY_Message_TYPE=3;
 }
