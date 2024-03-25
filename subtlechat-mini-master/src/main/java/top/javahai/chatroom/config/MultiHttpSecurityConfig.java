@@ -87,7 +87,7 @@ public class MultiHttpSecurityConfig {
     //忽略"/login","/verifyCode"请求，该请求不需要进入Security的拦截器
     @Override
     public void configure(WebSecurity web) throws Exception {
-      web.ignoring().antMatchers("/css/**","/fonts/**","/img/**","/js/**","/favicon.ico","/index.html","/admin/login","/admin/mailVerifyCode","/getPublicKey","/user/register");
+      web.ignoring().antMatchers("/css/**","/fonts/**","/img/**","/js/**","/favicon.ico","/index.html","/admin/login","/admin/mailVerifyCode","/getPublicKey","/user/register","/getAESKey");
     }
     //http请求验证和处理规则，响应处理的配置
     @Override
@@ -196,7 +196,7 @@ public class MultiHttpSecurityConfig {
     //忽略"/login","/verifyCode"请求，该请求不需要进入Security的拦截器
     @Override
     public void configure(WebSecurity web) throws Exception {
-      web.ignoring().antMatchers("/login","/verifyCode","/file","/ossFileUpload","/user/register","/user/checkUsername","/user/checkNickname","/getPublicKey","/user/loginMailVerifyCode","/user/mailVerifyCode","/doLoginMail");
+      web.ignoring().antMatchers("/login","/verifyCode","/file","/ossFileUpload","/user/register","/user/checkUsername","/user/checkNickname","/getPublicKey","/user/loginMailVerifyCode","/user/mailVerifyCode","/doLoginMail","/getAESKey");
     }
     //登录验证
     @Override
