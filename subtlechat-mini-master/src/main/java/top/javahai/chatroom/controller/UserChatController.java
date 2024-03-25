@@ -12,6 +12,7 @@ import top.javahai.chatroom.entity.UserConversation;
 import top.javahai.chatroom.entity.UserMessage;
 import top.javahai.chatroom.service.UserChatService;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RestController
@@ -33,7 +34,7 @@ public class UserChatController {
 
     @PostMapping("/conversations/join")
     public ResponseEntity<UserConversation> joinConversation(
-            @RequestBody JoinConversationRequest request) {
+            @RequestBody JoinConversationRequest request) throws NoSuchAlgorithmException {
         System.out.println("Received JoinConversationRequest: " + request);
         System.out.println("Received JoinConversationRequest: " + request.getUsername());
         System.out.println("Received JoinConversationRequest: " + request.getOtherUsername());

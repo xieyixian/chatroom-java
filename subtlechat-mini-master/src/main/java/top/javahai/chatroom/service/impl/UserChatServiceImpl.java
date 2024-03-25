@@ -14,6 +14,7 @@ import top.javahai.chatroom.repository.UserMessageRepository;
 import top.javahai.chatroom.repository.UserRepository;
 import top.javahai.chatroom.service.UserChatService;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class UserChatServiceImpl implements UserChatService {
     }
 
     @Override
-    public UserConversation joinConversation(String username, String otherUsername) {
+    public UserConversation joinConversation(String username, String otherUsername) throws NoSuchAlgorithmException {
         // 查找用户实体
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
@@ -58,7 +59,9 @@ public class UserChatServiceImpl implements UserChatService {
         // 如果没有找到共同的会话，则创建一个新会话
         if (commonConversationIds.isEmpty()) {
             conversation = new Conversation();
+            conversation.setKey(conversation.generateKey());
             conversation.setCreateTime(LocalDateTime.now());
+            System.out.println(conversation.getKey());
             // 保存新的会话到数据库，JPA会填充ID
             conversation = conversationRepository.save(conversation);
 
