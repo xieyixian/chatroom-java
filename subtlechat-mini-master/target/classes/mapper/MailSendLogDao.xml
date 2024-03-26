@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="top.javahai.chatroom.dao.MailSendLogDao">
+<mapper namespace="top.team7.chatroom.dao.MailSendLogDao">
 
-    <resultMap type="top.javahai.chatroom.entity.MailSendLog" id="MailSendLogMap">
+    <resultMap type="top.team7.chatroom.entity.MailSendLog" id="MailSendLogMap">
         <result property="msgId" column="msg_id" jdbcType="VARCHAR"/>
         <result property="contentType" column="content_type" jdbcType="INTEGER"/>
         <result property="content" column="content" jdbcType="VARCHAR"/>
@@ -15,7 +15,7 @@
         <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <!--查询单个-->
+
     <select id="queryById" resultMap="MailSendLogMap">
         select
           msg_id, content_type, content, status, route_key, exchange, count, try_time, create_time, update_time
@@ -23,7 +23,7 @@
         where msg_id = #{msgId}
     </select>
 
-    <!--查询指定行数据-->
+
     <select id="queryAllByLimit" resultMap="MailSendLogMap">
         select
           msg_id, content_type, content, status, route_key, exchange, count, try_time, create_time, update_time
@@ -31,7 +31,7 @@
         limit #{offset}, #{limit}
     </select>
 
-    <!--通过实体作为筛选条件查询-->
+
     <select id="queryAll" resultMap="MailSendLogMap">
         select
           msg_id, content_type, content, status, route_key, exchange, count, try_time, create_time, update_time
@@ -70,13 +70,13 @@
         </where>
     </select>
 
-    <!--新增所有列-->
+
     <insert id="insert" keyProperty="msgId" useGeneratedKeys="true">
         insert into chatroom.mail_send_log(msg_id,content_type, content, status, route_key, exchange, count, try_time, create_time, update_time)
         values (#{msgId},#{contentType}, #{content}, #{status}, #{routeKey}, #{exchange}, #{count}, #{tryTime}, #{createTime}, #{updateTime})
     </insert>
 
-    <!--通过主键修改数据-->
+
     <update id="update">
         update chatroom.mail_send_log
         <set>
@@ -111,7 +111,7 @@
         where msg_id = #{msgId}
     </update>
 
-    <!--通过主键删除-->
+
     <delete id="deleteById">
         delete from chatroom.mail_send_log where msg_id = #{msgId}
     </delete>

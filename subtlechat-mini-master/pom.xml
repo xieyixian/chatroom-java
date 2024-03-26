@@ -8,10 +8,10 @@
         <version>2.3.1.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>top.javahai</groupId>
-    <artifactId>subtlechat-mini</artifactId>
+    <groupId>top.team7</groupId>
+    <artifactId>team7-chatroom</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>subtlechat-mini</name>
+    <name>team7-chatroom</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>
