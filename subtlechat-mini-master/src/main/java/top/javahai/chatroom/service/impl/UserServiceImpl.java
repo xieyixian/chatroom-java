@@ -158,11 +158,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public RespPageBean getAllUserByPage(Integer page, Integer size,String keyword,Integer isLocked) {
         if (page!=null&&size!=null){
-            page=(page-1)*size;//起始下标
+            page=(page-1)*size;
         }
-        //获取用户数据
         List<User> userList=userDao.getAllUserByPage(page,size,keyword,isLocked);
-        //获取用户数据的总数
         Long total=userDao.getTotal(keyword,isLocked);
         RespPageBean respPageBean = new RespPageBean();
         respPageBean.setData(userList);
@@ -181,7 +179,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   }
     @Override
     public Optional<User> findByUsername(String username) {
-        // 调用 repository 方法查找用户
         return userRepository.findByUsername(username);
     }
 
@@ -189,7 +186,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         List<User> users = new ArrayList<>();
         for (String username : usernames) {
             Optional<User> userOptional = userRepository.findByUsername(username);
-            userOptional.ifPresent(users::add); // 如果存在用户信息，则添加到列表中
+            userOptional.ifPresent(users::add);
         }
         return users;
     }

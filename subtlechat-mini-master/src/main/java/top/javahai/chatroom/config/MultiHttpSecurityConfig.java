@@ -46,19 +46,15 @@ import java.util.Map;
 
 import static top.javahai.chatroom.utils.RSAUtil.encryptWithPrivate;
 
-/**
- * @author Hai
- * @date 2020/6/19 - 12:37
- */
 @EnableWebSecurity
 public class MultiHttpSecurityConfig {
-  //密码加密方案
+
   @Bean
   PasswordEncoder passwordEncoder(){
     return new BCryptPasswordEncoder();
   }
   private static void configureSwagger(HttpSecurity http) throws Exception {
-    // Swagger开放访问配置
+    // Swagger
     http.authorizeRequests()
             .antMatchers("/swagger-ui/**", "/v2/api-docs", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**", "/csrf", "/").permitAll();
   }
@@ -78,21 +74,17 @@ public class MultiHttpSecurityConfig {
     @Autowired
     DecryptFilter decryptFilter;
 
-    //用户名和密码验证服务
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
       auth.userDetailsService(adminService);
     }
 
-    //忽略"/login","/verifyCode"请求，该请求不需要进入Security的拦截器
     @Override
     public void configure(WebSecurity web) throws Exception {
       web.ignoring().antMatchers("/css/**","/fonts/**","/img/**","/js/**","/favicon.ico","/index.html","/admin/login","/admin/mailVerifyCode","/getPublicKey","/user/register","/getAESKey");
     }
-    //http请求验证和处理规则，响应处理的配置
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-      //将验证码过滤器添加在用户名密码过滤器的前面
       http.addFilterBefore(decryptFilter,UsernamePasswordAuthenticationFilter.class);
       http.addFilterBefore(verificationCodeFilter, UsernamePasswordAuthenticationFilter.class);
       configureSwagger(http);
@@ -104,7 +96,6 @@ public class MultiHttpSecurityConfig {
               .passwordParameter("password")
               .loginPage("/admin/login")
               .loginProcessingUrl("/admin/doLogin")
-              //成功处理
               .successHandler(new AuthenticationSuccessHandler() {
                 @Override
                 public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse resp, Authentication authentication) throws IOException, ServletException {
@@ -120,7 +111,7 @@ public class MultiHttpSecurityConfig {
                     encryptedusername = rsa.encryptWithPrivate(admin.getUsername());
                     encrypteduseremail = rsa.encryptWithPrivate(admin.getEmail());
                   } catch (Exception e) {
-                    RespBean wrong = RespBean.ok("加密失败");
+                    RespBean wrong = RespBean.ok("fail");
                     String w = new ObjectMapper().writeValueAsString(wrong);
                     out.write(w);
                     out.flush();
@@ -130,25 +121,23 @@ public class MultiHttpSecurityConfig {
                   admin.setUsername(encryptedusername);
                   admin.setEmail(encrypteduseremail);
 
-                  RespBean ok = RespBean.ok("登录成功", admin);
+                  RespBean ok = RespBean.ok("success", admin);
                   String s = new ObjectMapper().writeValueAsString(ok);
                   out.write(s);
                   out.flush();
                   out.close();
                 }
               })
-              //失败处理
+
               .failureHandler(myAuthenticationFailureHandler)
-              .permitAll()//返回值直接返回
+              .permitAll()
               .and()
-              //登出处理
               .logout()
               .logoutUrl("/admin/logout")
               .logoutSuccessHandler(myLogoutSuccessHandler)
               .permitAll()
               .and()
-              .csrf().disable()//关闭csrf防御方便调试
-              //没有认证时，在这里处理结果，不进行重定向到login页
+              .csrf().disable()
               .exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPoint() {
                 @Override
                 public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
@@ -180,29 +169,18 @@ public class MultiHttpSecurityConfig {
     @Resource
     private RedissonClient redisson;
 
-    //验证服务
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
       auth.userDetailsService(userService);
     }
 
-//    //密码加密
-//    @Bean
-//    PasswordEncoder passwordEncoder(){
-//      return new BCryptPasswordEncoder();
-//    }
-
-
-    //忽略"/login","/verifyCode"请求，该请求不需要进入Security的拦截器
     @Override
     public void configure(WebSecurity web) throws Exception {
       web.ignoring().antMatchers("/login","/verifyCode","/file","/ossFileUpload","/user/register","/user/checkUsername","/user/checkNickname","/getPublicKey","/user/loginMailVerifyCode","/user/mailVerifyCode","/doLoginMail","/getAESKey");
     }
-    //登录验证
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       configureSwagger(http);
-      //将验证码过滤器添加在用户名密码过滤器的前面
       http.addFilterBefore(decryptFilter,UsernamePasswordAuthenticationFilter.class);
       http.addFilterBefore(verificationCodeFilter, UsernamePasswordAuthenticationFilter.class);
       http.authorizeRequests()
@@ -213,7 +191,6 @@ public class MultiHttpSecurityConfig {
               .passwordParameter("password")
               .loginPage("/login")
               .loginProcessingUrl("/doLogin")
-              //成功处理
               .successHandler(new AuthenticationSuccessHandler() {
                 @Override
                 public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse resp, Authentication authentication) throws IOException, ServletException {
@@ -221,67 +198,53 @@ public class MultiHttpSecurityConfig {
                   PrintWriter out=resp.getWriter();
                   User user=(User) authentication.getPrincipal();
                   user.setPassword(null);
-                  System.out.println("1111111111111"+user.getUsername());
 
-
-                  //更新用户状态为在线
                   userService.setUserStateToOn(user.getId());
                   user.setUserStateId(1);
 
-                  //redis缓存用户在线状态
                   RBucket<Object> bucket = redisson.getBucket(String.format(USER_CONTINUE_LIFE_KEY,user.getId()));
                   bucket.set("user_"+user.getId(),8L, TimeUnit.SECONDS);
 
-                  //广播系统通知消息
-                  simpMessagingTemplate.convertAndSend("/topic/notification","系统消息：用户【"+user.getNickname()+"】进入了聊天室");
-                  // 生成JWT
+                  simpMessagingTemplate.convertAndSend("/topic/notification","System：user【"+user.getNickname()+"】coming chat room");
+
                   final String jwt = JwtUtils.generateToken(user.getUsername());
 
-                  // 创建包含JWT和用户信息的响应
                   Map<String, Object> tokenResponse = new HashMap<>();
                   tokenResponse.put("token", jwt);
                   tokenResponse.put("user", user);
-                  // 依你的实际需求，这里可以自定义需要返回的用户信息
-                  // 将响应序列化为JSON字符串
-                  String responseJson = new ObjectMapper().writeValueAsString(RespBean.ok("登录成功", tokenResponse));
 
-                  // 写入响应
+                  String responseJson = new ObjectMapper().writeValueAsString(RespBean.ok("success", tokenResponse));
+
                   out.write(responseJson);
                   out.flush();
                   out.close();
                 }
               })
-              //失败处理
               .failureHandler(myAuthenticationFailureHandler)
-              .permitAll()//返回值直接返回
+              .permitAll()
               .and()
-              //登出处理
               .logout()
               .logoutUrl("/logout")
               .logoutSuccessHandler(new LogoutSuccessHandler() {
                 @Override
                 public void onLogoutSuccess(HttpServletRequest req, HttpServletResponse resp, Authentication authentication) throws IOException, ServletException {
-                  //更新用户状态为离线
                   User user = (User) authentication.getPrincipal();
                   userService.setUserStateToLeave(user.getId());
 
-                  //redis缓存用户在线状态
                   RBucket<Object> bucket = redisson.getBucket(String.format(USER_CONTINUE_LIFE_KEY,user.getId()));
                   bucket.set("user_"+user.getId(),0L, TimeUnit.SECONDS);
 
-                  //广播系统消息
-                  simpMessagingTemplate.convertAndSend("/topic/notification","系统消息：用户【"+user.getNickname()+"】退出了聊天室");
+                  simpMessagingTemplate.convertAndSend("/topic/notification","system：user【"+user.getNickname()+"】logout chatroom");
                   resp.setContentType("application/json;charset=utf-8");
                   PrintWriter out=resp.getWriter();
-                  out.write(new ObjectMapper().writeValueAsString(RespBean.ok("成功退出！")));
+                  out.write(new ObjectMapper().writeValueAsString(RespBean.ok("logout！")));
                   out.flush();
                   out.close();
                 }
               })
               .permitAll()
               .and()
-              .csrf().disable()//关闭csrf防御方便调试
-              //没有认证时，在这里处理结果，不进行重定向到login页
+              .csrf().disable()
               .exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPoint() {
                 @Override
                 public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {

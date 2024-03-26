@@ -67,8 +67,13 @@ public class WsController {
     message.setFrom(user.getUsername());
     message.setCreateTime(new Date());
 //    message.setContent(AesEncryptUtil.desEncrypt(message.getContent()));
-    String desContent = aesEncryptUtil.desEncrypt(message.getContent(),aesEncryptUtil.getKEY(),aesEncryptUtil.getIV());
-
+    String desContent;
+    if(message.getMessageTypeId()==1) {
+      desContent = aesEncryptUtil.desEncrypt(message.getContent(), aesEncryptUtil.getKEY(), aesEncryptUtil.getIV());
+    }
+    else{
+      desContent=message.getContent();
+    }
     message.setContent(desContent);
     System.out.println("message been des "+message.getContent());
 

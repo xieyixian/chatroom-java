@@ -13,27 +13,24 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-/**
- * @author Hai
- * @date 2020/6/19 - 13:13
- */
+
 @Configuration
 public class MyAuthenticationFailureHandler implements AuthenticationFailureHandler {
   @Override
   public void onAuthenticationFailure(HttpServletRequest req, HttpServletResponse resp, AuthenticationException exception) throws IOException, ServletException {
     resp.setContentType("application/json;charset=utf-8");
     PrintWriter out=resp.getWriter();
-    RespBean error = RespBean.error("登录失败!");
+    RespBean error = RespBean.error("Login failed!");
     if (exception instanceof LockedException){
-      error.setMsg("账户已锁定，请联系管理员！");
+      error.setMsg("The account has been locked, please contact the administrator!");
     }else if (exception instanceof CredentialsExpiredException){
-      error.setMsg("密码已过期，请联系管理员！");
+      error.setMsg("The password has expired, please contact the administrator！");
     }else if (exception instanceof AccountExpiredException){
-      error.setMsg("账户已过期，请联系管理员！");
+      error.setMsg("The account has expired, please contact the administrator！");
     }else if (exception instanceof DisabledException){
-      error.setMsg("账户被禁用，请联系管理员!");
+      error.setMsg("Account is disabled, please contact the administrator!");
     }else if (exception instanceof BadCredentialsException){
-      error.setMsg("用户名或密码错误，请重新输入！");
+      error.setMsg("Username or password is wrong, please re-enter！");
     }
     String s = new ObjectMapper().writeValueAsString(error);
     out.write(s);

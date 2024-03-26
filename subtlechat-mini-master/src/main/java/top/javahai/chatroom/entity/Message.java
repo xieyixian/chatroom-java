@@ -1,7 +1,6 @@
 package top.javahai.chatroom.entity;
 
 import java.util.Date;
-
 /**
  * 单聊的消息实体
  * @author Hai

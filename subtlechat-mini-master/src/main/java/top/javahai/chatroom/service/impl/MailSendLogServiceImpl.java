@@ -10,12 +10,6 @@ import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
-/**
- * (MailSendLog)表服务实现类
- *
- * @author makejava
- * @since 2020-10-02 14:40:33
- */
 @Service("mailSendLogService")
 public class MailSendLogServiceImpl implements MailSendLogService {
     @Resource

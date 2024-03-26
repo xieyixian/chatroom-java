@@ -20,10 +20,6 @@ import java.util.UUID;
 
 import static top.javahai.chatroom.config.RabbitMQConfig.LOGGER;
 
-/**
- * @author Hai
- * @date 2020/10/2 - 23:27
- */
 @Service("verifyCodeService")
 public class VerifyCodeServiceImpl implements VerifyCodeService {
     @Autowired
@@ -52,18 +48,16 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        // 将 Map<String, String> 对象转换为 JSON 字符串
         String jsonEmailCodeMap;
         try {
             jsonEmailCodeMap = objectMapper.writeValueAsString(emailCodeMap);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-            // 处理 JSON 转换异常
             return;
         }
 
-        //添加消息记录
-        LOGGER.info("发送验证码");
+
+        LOGGER.info("Send the verification code");
         String msgId = UUID.randomUUID().toString();
         MailSendLog mailSendLog = new MailSendLog();
         mailSendLog.setMsgId(msgId);

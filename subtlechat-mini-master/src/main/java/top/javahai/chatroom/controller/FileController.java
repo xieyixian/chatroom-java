@@ -14,10 +14,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-/**
- * @author Hai
- * @date 2020/6/21 - 16:47
- */
+
 @RestController
 public class FileController {
 
@@ -47,13 +44,7 @@ public class FileController {
     return aliyunOssUtil.upload(file.getInputStream(),module,filename);
   }
 
-  /**
-   * Created by ShuSheng007
-   * <p>
-   * author     : ShuShneg007
-   * date       : 2021/6/25 19:09
-   * description:
-   */
+
   class Base64ToMultipartFile implements MultipartFile {
     private final byte[] fileContent;
 
@@ -61,10 +52,7 @@ public class FileController {
     private final String contentType;
 
 
-    /**
-     * @param base64
-     * @param dataUri     格式类似于: data:image/png;base64
-     */
+
     public Base64ToMultipartFile(String base64, String dataUri) {
       this.fileContent = Base64.getDecoder().decode(base64.getBytes(StandardCharsets.UTF_8));
       this.extension = dataUri.split(";")[0].split("/")[1];

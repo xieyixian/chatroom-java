@@ -26,10 +26,7 @@ import java.util.Date;
 
 import static top.javahai.chatroom.config.RabbitMQConfig.LOGGER;
 
-/**
- * @author Hai
- * @date 2020/10/2 - 13:54
- */
+
 @Component
 public class FeedbackReceiver {
 
@@ -48,35 +45,31 @@ public class FeedbackReceiver {
     ))
     public void getFeedbackMessage(Message message, Channel channel) throws IOException {
         //获取消息内容
-        LOGGER.info("反馈以消费");
+        LOGGER.info("feedback to consume");
         String s = message.getPayload().toString();
         //获取消息的唯一标志
         MessageHeaders headers = message.getHeaders();
         Long tag = ((Long) headers.get(AmqpHeaders.DELIVERY_TAG));
         String msgId = headers.get("spring_returned_message_correlation").toString();
-        LOGGER.info("【" + msgId + "】-正在处理的消息");
+        LOGGER.info("【" + msgId + "】-Message being processed");
         //是否已消费
-//        if (redisTemplate.opsForHash().entries("mail_log").containsKey(msgId)){
-//            channel.basicAck(tag,true);
-//            LOGGER.info("【"+msgId+"】消息出现重复消费");
-//            return;
-//        }
+
         try {
             Feedback feedback = JsonUtil.parseToObject(s, Feedback.class);
             System.out.println(feedback.getContent());
             SimpleMailMessage mailMessage = new SimpleMailMessage();
-            mailMessage.setSubject("来自用户的意见反馈");
+            mailMessage.setSubject("Feedback from users");
             //读取信息
             StringBuilder formatMessage = new StringBuilder();
-            formatMessage.append("用户编号：" + feedback.getUserId() + "\n");
-            formatMessage.append("用户名：" + feedback.getUsername() + "\n");
-            formatMessage.append("用户昵称：" + feedback.getNickname() + "\n");
-            formatMessage.append("反馈内容：" + feedback.getContent());
+            formatMessage.append("user ID：" + feedback.getUserId() + "\n");
+            formatMessage.append("username：" + feedback.getUsername() + "\n");
+            formatMessage.append("User's Nickname：" + feedback.getNickname() + "\n");
+            formatMessage.append("Feedback content：" + feedback.getContent());
             System.out.println(">>>>>>>>>>>>>>" + formatMessage + "<<<<<<<<<<<<<<<<<<");
             //设置邮件消息
             mailMessage.setText(formatMessage.toString());
-            mailMessage.setFrom("发送的邮箱地址");
-            mailMessage.setTo("接收的邮箱地址");
+            mailMessage.setFrom("Email address to send");
+            mailMessage.setTo("Received email address");
             mailMessage.setSentDate(new Date());
             javaMailSender.send(mailMessage);
             //消息处理完成
@@ -87,7 +80,7 @@ public class FeedbackReceiver {
         } catch (Exception e) {
             //出现异常就重新放回到队列中
             channel.basicNack(tag, false, true);
-            LOGGER.info("【" + msgId + "】消息重新放回到了队列中");
+            LOGGER.info("【" + msgId + "】The message is put back into the queue");
             e.printStackTrace();
         }
 

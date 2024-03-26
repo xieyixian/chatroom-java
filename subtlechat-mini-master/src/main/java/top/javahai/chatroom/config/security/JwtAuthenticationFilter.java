@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
                 httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT Token");
-//                return; // 不再继续过滤器链，直接返回
+//                return;
             }
         }
         filterChain.doFilter(request, response);

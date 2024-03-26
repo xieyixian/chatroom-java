@@ -28,13 +28,6 @@ public class FastDFSUtil {
     }
   }
 
-  /**
-   * uploadfile
-   * @param file
-   * @return
-   * @throws IOException
-   * @throws MyException
-   */
   public static String upload(MultipartFile file) throws IOException, MyException {
     // filename
     String oldName=file.getOriginalFilename();
@@ -43,20 +36,5 @@ public class FastDFSUtil {
     return client1.upload_file1(file.getBytes(),oldName.substring(oldName.lastIndexOf(".")+1),null);
   }
 
-  /**
-   * Get a token to access a file
-   * @throws UnsupportedEncodingException
-   * @throws NoSuchAlgorithmException
-   * @throws MyException
-   * @return
-   */
-//  public static StringBuilder getToken(String fileId) throws UnsupportedEncodingException, NoSuchAlgorithmException, MyException {
-//    int ts = (int) Instant.now().getEpochSecond();
-//    fileId=fileId.substring(7);
-//    String token = ProtoCommon.getToken(fileId, ts, "FastDFS1234567890");
-//    StringBuilder sb = new StringBuilder();
-//    sb.append("?token=").append(token);
-//    sb.append("&ts=").append(ts);
-//    return sb;
-//  }
+
 }

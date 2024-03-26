@@ -36,23 +36,20 @@ public class MessageReceiver {
     ))
     public void getMessage(Message message, Channel channel) throws IOException {
 
-        LOGGER.info("验证码已消费");
+        LOGGER.info("Verification code has been consumed");
 
         String info = message.getPayload().toString();
-        //获取消息头，消息标志tag
         MessageHeaders headers = message.getHeaders();
         Long tag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
-        //获取消息ID
         String msgId = (String) headers.get("spring_returned_message_correlation");
-        LOGGER.info("【" + msgId + "】-正在处理的消息");
+        LOGGER.info("【" + msgId + "】-Message being processed");
 
         LOGGER.info(info);
         try {
-            // 移除字符串中的 "GroupMsgContent{}" 部分
+
             String content = info.substring(info.indexOf("{") + 1, info.lastIndexOf("}"));
 
 
-            // 分割字符串并提取值存入数组
             String[] parts = content.split(", ");
             String[] values = new String[parts.length];
             for (int i = 0; i < parts.length; i++) {
@@ -60,11 +57,11 @@ public class MessageReceiver {
                 values[i] = keyValue[1];
             }
 
-            // 输出数组中的值
+
             for (String value : values) {
                 System.out.println("值：" + value);
             }
-            //groupChatService.sendMessage(groupId, senderUsername, messageText, messageTypeId);
+
             LOGGER.info("Message processed successfully: " + msgId);
             GroupMsgContent groupMsgContent = new GroupMsgContent();
             int id = Integer.parseInt(values[0]);

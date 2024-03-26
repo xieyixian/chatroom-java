@@ -47,8 +47,7 @@ public class RedisExpireListener extends KeyExpirationEventMessageListener {
             //更新用户状态为离线
             userService.setUserStateToLeave(user.getId());
 
-            //广播系统消息
-            simpMessagingTemplate.convertAndSend("/topic/notification","系统消息：用户【"+user.getNickname()+"】离线");
+            simpMessagingTemplate.convertAndSend("/topic/notification","system：user【"+user.getNickname()+"】offline");
         }
     }
 }

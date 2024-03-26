@@ -120,12 +120,10 @@ public class RabbitMQConfig {
     @Bean
     public RabbitTemplate rabbitTemplate(){
         RabbitTemplate rabbitTemplate = new RabbitTemplate(cachingConnectionFactory);
-        //成功投递消息到Broker交换机站点的回调函数
         rabbitTemplate.setConfirmCallback((data,ack,cause)->{
             String msgId = data.getId();
             if(ack){
                 LOGGER.info(msgId+"Message sent successfully");
-                //修改数据库中的记录，消息发送成功，将status设为1
                 mailSendLogService.updateMailSendLogStatus(msgId, MailConstants.SUCCESS);
             }else{
                 LOGGER.error(msgId+"Message sending failure！");
