@@ -97,6 +97,7 @@ public class WsController {
 
     groupMsgContentService.insert(groupMsgContent);
     messageService.SendGroupMsg(groupMsgContent);
+    groupMsgContentService.deleteGroupMsgById(groupMsgContent);
   }
 
 }
