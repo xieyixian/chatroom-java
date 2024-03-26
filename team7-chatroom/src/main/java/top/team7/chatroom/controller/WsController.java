@@ -63,7 +63,13 @@ public class WsController {
             message.getMessageTypeId()
     );
 
-    message.setContent(aesEncryptUtil.encrypt(message.getContent(),aesEncryptUtil.getKEY(),aesEncryptUtil.getIV()));
+    if(message.getMessageTypeId()==1) {
+      message.setContent(aesEncryptUtil.encrypt(message.getContent(),aesEncryptUtil.getKEY(),aesEncryptUtil.getIV()));
+    }
+    else{
+
+    }
+
     System.out.println("message need to be sent "+message.getContent());
 
 

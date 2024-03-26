@@ -7,13 +7,17 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="subtlechat-mini" />
+        <module name="team7-chatroom" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="subtlechat-mini" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="subtlechat-mini" options="-parameters" />
+      <module name="team7-chatroom" options="-parameters" />
     </option>
   </component>
 </project>
