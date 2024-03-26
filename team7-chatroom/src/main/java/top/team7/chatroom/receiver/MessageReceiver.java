@@ -67,6 +67,7 @@ public class MessageReceiver {
             int id = Integer.parseInt(values[0]);
             int formId = Integer.parseInt(values[1]);
             int msgTypeId =  Integer.parseInt(values[6]);
+            int type =  Integer.parseInt(values[7]);
             groupMsgContent.setFromId(id);
             groupMsgContent.setFromId(formId);
             groupMsgContent.setFromName(values[2].substring(1, values[2].length() - 1));
@@ -74,6 +75,7 @@ public class MessageReceiver {
             groupMsgContent.setCreateTime(new Date());
             groupMsgContent.setContent((values[5]).substring(1, values[5].length() - 1));
             groupMsgContent.setMessageTypeId(msgTypeId);
+            groupMsgContent.setType(type);
             simpMessagingTemplate.convertAndSend("/topic/greetings",groupMsgContent);
             channel.basicAck(tag, false);
         } catch (Exception e) {
